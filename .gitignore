@@ -1,0 +1,5 @@
+/venv
+/shared/tests/zip_test_download_location
+/shared/tools/env_os_variables.py
+trip_updates(6).pb
+/.idea
