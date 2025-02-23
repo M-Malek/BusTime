@@ -47,10 +47,21 @@ def download_trips_data(url):
     :return: None or ValueError if data download or save failed
     """
     from data_collector_poznan.src.data_preparing import ReadZipData as ReadZip
-    import shared.tools.data_collector as test_dc
+    import shared.tools.data_collector as data_collector
+    import shared.tools.env_os_variables as eov
+    import shared.tools.filestoolbox as FilesToolBox
 
-
-    pass
+    """
+    ZTM save their .zip files with time tables etc. in very useful format:
+    start-date_end-date.zip
+    On start: extract all zip names and create a list of available files
+    Once a day check file - if new file has been found, update the list and save new file and start extraction to db
+    """
+    # Step 1: download list:
+    file_names = FilesToolBox.WebSearcher(eov.dc_zip_files_list_url).file_names_column_table_searcher('Nazwa pliku')
+    print(file_names)
+    # Step 2: check list:
+    # Step 3 (if there is a new list) save file, start extraction to db:
 
 
 def download_vehicle_data(url):

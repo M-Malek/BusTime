@@ -83,9 +83,16 @@ def common_test_1():
         print(ToolBox.row_decoder(datum))
 
 
+def common_test_2():
+    import data_collector_poznan.src.data_manager as data_manager
+    from shared.tools import env_os_variables
+    data_manager.download_trips_data(env_os_variables.dc_zip_url)
+
+
 # Run tests:
 # vehicles_test_1()
 # vehicles_test_2()
 # stop_test_4()
 # stop_test_5()
-common_test_1()
+# common_test_1()
+common_test_2()
