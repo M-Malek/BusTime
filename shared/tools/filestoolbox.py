@@ -119,30 +119,35 @@ class WebSearcher:
         import requests
 
         response = requests.get(url)
-        site = BeautifulSoup(response.text, 'html.parser')
-        table_loc = site.find("div", {'class': 'table-responsive'})
-        table_content = table_loc.find('tbody')
-        # Iterate through table_content
-        # Find 'tbody' tag
-        # Find 'tr' tag
-        # If 'td' with file name found (.zip in name), add to result list
-        searched_tds = []
-        result_tuples_list = []
-        # row_content = table_content.find('tr')
-        td_content = table_content.findAll('td')
-        for td in td_content:
-            if '.zip' in td.text:
-                searched_tds.append(td)
+        if response.status_code == 200:
+            site = BeautifulSoup(response.text, 'html.parser')
+            table_loc = site.find("div", {'class': 'table-responsive'})
+            table_content = table_loc.find('tbody')
+            # Iterate through table_content
+            # Find 'tbody' tag
+            # Find 'tr' tag
+            # If 'td' with file name found (.zip in name), add to result list
+            searched_tds = []
+            result_tuples_list = []
+            # row_content = table_content.find('tr')
+            td_content = table_content.findAll('td')
+            for td in td_content:
+                if '.zip' in td.text:
+                    searched_tds.append(td)
 
-        # From founded td tag separate dates and save in tuple (start_date, end_date)
-        for datum in searched_tds:
-            start_date = datum.text[0:8]
-            end_date = datum.text[9:17]
-            # print(start_date, end_date)
-            new_tuple = (start_date, end_date)
-            result_tuples_list.append(new_tuple)
+            # From founded td tag separate dates and save in tuple (start_date, end_date)
+            for datum in searched_tds:
+                start_date = datum.text[0:8]
+                end_date = datum.text[9:17]
+                # print(start_date, end_date)
+                new_tuple = (start_date, end_date)
+                result_tuples_list.append(new_tuple)
 
-        return result_tuples_list
+            return result_tuples_list
+        else:
+            # There was an error during file check!
+            print(f"Error: cannot check if new .zip file exist!")
+            return []
 
     @staticmethod
     def download_old_timetable_ZTM_Poznan(*args):
@@ -159,8 +164,11 @@ class WebSearcher:
             except ValueError:
                 raise ValueError("Bad dates!")
         else:
-            dates = args[0]
+            try:
+                dates = args[0]
+            except ValueError:
+                raise ValueError("Bad dates!")
 
         download_url = r"https://www.ztm.poznan.pl/pl/dla-deweloperow/getGTFSFile/?file="
-        # To be continued...
-        pass
+        downloaded_file = requests.get(download_url+dates)
+        return downloaded_file

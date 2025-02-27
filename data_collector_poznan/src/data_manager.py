@@ -40,16 +40,19 @@ arrival time
 """
 
 
-def download_trips_data(url):
+def download_trips_data(url, archive_loc):
     """
     Run functions to download data about trips from ZTM services
     :param url: url for data
+    :param archive_loc: str, location of archive folder
     :return: None or ValueError if data download or save failed
     """
     from data_collector_poznan.src.data_preparing import ReadZipData as ReadZip
     import shared.tools.data_collector as data_collector
     import shared.tools.env_os_variables as eov
     import shared.tools.filestoolbox as FilesToolBox
+    import os
+    import requests
 
     """
     ZTM save their .zip files with time tables etc. in very useful format:
@@ -58,10 +61,26 @@ def download_trips_data(url):
     Once a day check file - if new file has been found, update the list and save new file and start extraction to db
     """
     # Step 1: download list:
-    file_names = FilesToolBox.WebSearcher(eov.dc_zip_files_list_url).file_names_column_table_searcher('Nazwa pliku')
-    print(file_names)
-    # Step 2: check list:
-    # Step 3 (if there is a new list) save file, start extraction to db:
+    url_zip_link = r'https://www.ztm.poznan.pl/otwarte-dane/gtfsfiles/'
+    file_names = FilesToolBox.WebSearcher.file_names_column_table_searcher(url_zip_link)
+    # Step 2: check list with already downloaded files:
+    files_in_dir = [f for f in os.listdir(url) if os.path.isfile(os.path.join(archive_loc, f))]
+    # Step 3: if given .zip file is not in our archive_loc, download it and save in archive_loc
+    for file in file_names:
+        if file in files_in_dir:
+            continue
+        else:
+            response = requests.get(url)
+            if response.status_code == 200:
+                with open(archive_loc, 'wb') as save_file:
+                    for chunk in response.iter_content(chunk_size=1024):
+                        save_file.write(chunk)
+                print(f"Pobrano plik: {file}")
+            else:
+                print(f"Error during .zip download, error code: {response.status_code}")
+                # raise requests.exceptions.HTTPError("Error during file download")
+    # Step 4 (if there is a new list) save file, start extraction to db:
+
 
 
 def download_vehicle_data(url):
