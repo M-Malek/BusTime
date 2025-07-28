@@ -40,5 +40,9 @@ Check if example like abow are not first or last stop of vehicle!
 ZTM is able to change current timetable while during its validity
 ?Problem potential solution: check timetable more than once per day - this solutions required to change settings in
 zip_gather - currently zip_gather checks if file with schedules already exists, if not, new schedules is downloaded
-2025-07-28 - download_trips_data in zip_gather.py has been modified,
+2025-07-28 - download_trips_data in zip_gather.py has been modified and left as optional function, new simple function
+schedules_downloader has been downloaded
+New and old schedules should be saved in database. Storing old .zip can be resource-hungry (one .zip weight ca. 7 MB)
+Old .zip as archive can be downloaded once and add as old route's path at a later date as feature (check old schedules
+and routes)
 
