@@ -1,0 +1,44 @@
+This file is an archive of all problems with project. All problems and solutions should be written like an example
+below:
+-----------------------------
+?<Problem date>
+?Problem description:
+?Problem potential solution:
+?Problem final solution:
+?Problem end date: <problem end date>
+----------------------------
+Founded problems:
+-----------------------------
+?2025-07-17
+?Problem description:
+data_collector_poznan.src.structure.collector.py -> returned data, e.g.:
+{'id': None, 'trip_id': '184', 'route_id': '184', 'lat': None, 'lng': None,
+'timestamp': datetime.datetime(2025, 7, 17, 19, 55, 51), 'seq': 7, 'delay': 47}
+can be corrupted or be a mess
+'trip_id': '184' -> 184 is a line number, not real trip id!
+lat or lng == None? Where is this vehicle?
+?Problem potential solution:
+For trip_id changed that trip_id is always from vehicle file -> bullshit, loop takes trip_id as key argument!
+trip_id is correct,
+For None as lat or lng:
+if seq is not None:
+    set lat and lng as stop lat and lng based on timetable bus location (przypisz lat i lng dla przystanku na którym
+    wg. sekwencji powinien być pojazd)
+if seq, lat and lng is None:
+    set lat, lng and seq based on timetable,
+For all required correction mark entry as correction: true,
+
+{'id': None, 'trip_id': '13', 'route_id': '13', 'lat': None, 'lng': None,
+'timestamp': datetime.datetime(2025, 7, 17, 20, 47, 31), 'seq': 17, 'delay': 59}
+Check if example like abow are not first or last stop of vehicle!
+
+?Problem final solution:
+?Problem end date: <problem end date>
+----------------------------
+?2025-07-28
+?Problem description:
+ZTM is able to change current timetable while during its validity
+?Problem potential solution: check timetable more than once per day - this solutions required to change settings in
+zip_gather - currently zip_gather checks if file with schedules already exists, if not, new schedules is downloaded
+2025-07-28 - download_trips_data in zip_gather.py has been modified,
+

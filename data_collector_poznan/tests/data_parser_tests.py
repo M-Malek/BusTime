@@ -1,7 +1,6 @@
 # import os
 # import sys
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-import pandas
 
 class DataParserZipTester:
     import shared.tools.data_collector as test_dc
@@ -10,7 +9,7 @@ class DataParserZipTester:
     test_file = test_dc.download_zip(zip_url)
 
     def test_one(self):
-        from data_collector_poznan.src import data_parser as test_dp
+        from data_collector_poznan.src.parser import data_parser as test_dp
 
         test_dp.PrepareZip(self.test_file).read_all_zip()
         # test_dp.read_zip(self.test_file)
@@ -20,7 +19,7 @@ class DataParserZipTester:
         Check if collected data have right shape
         :return: Assertion error when fails
         """
-        import data_collector_poznan.src.data_parser as test_dp
+        import data_collector_poznan.src.parser.data_parser as test_dp
 
         test_two = test_dp.PrepareZip(self.test_file)
         test_two.read_all_zip()
@@ -52,7 +51,7 @@ class DataParserZipTester:
         Test only routes download
         :return: AssertionError if we cannot prepare data
         """
-        import data_collector_poznan.src.data_parser as dp
+        import data_collector_poznan.src.parser.data_parser as dp
         tested_data = dp.PrepareZip(self.test_file)
         prepare_routes = tested_data.routes
         print(type(prepare_routes))
@@ -60,13 +59,13 @@ class DataParserZipTester:
         # print(dp.PrepareZip(self.test_file).read_routes().head())
 
     def test_four(self):
-        import data_collector_poznan.src.data_parser as dp
+        import data_collector_poznan.src.parser.data_parser as dp
         routes = dp.BasicZipData(self.test_file, "routes.txt").routes
         # print(routes.head())
         # assert type(routes) == pandas.DataFrame, "Error: no DataFrame"
 
 
-DataParserZipTester().test_four()
+# DataParserZipTester().test_four()
 """
     Catched errors:
     1. Error with handling response
@@ -77,5 +76,4 @@ DataParserZipTester().test_four()
     Reason: pandas -> OSError [Errno 22]
     Solution: I give to pandas.read_csv file content, not simple file
 """
-
 

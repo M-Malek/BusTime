@@ -1,43 +1,10 @@
 """
-Prepare all file sets to save in database
-Creator: M-Malek
+Downloading .zip with routes data
+@M-Malek
 """
-
-"""
-Things required to save in database:
-Vehicles:
-Number
-PlannedTrip ID
-Lat
-Lng
-
-Stops:
-Stop_id
-Name
-Lat
-Lng
-Zone
-
-Scheduled_Route:
-Route_ID
-Short_Name
-Type
-Stops in format:
-Stop_id, arrival_time, departure_time
-First_stop_id
-Last_stop_id
-
-Real_Route:
-Route_ID
-Short_Name
-Vehicle Number
-Stops in format:
-Stop_id, real_arrival_time, real_departure_time
-
-Data for Vehicles, Stops and Scheduled Route are the data from vehicles.pb and .zip file
-Data for Real_Route have to be calculate based on real vehicle position, actual time, stop position and scheduled 
-arrival time
-"""
+import shared.tools.env_os_variables as env_variables
+# GLOBALS:
+ROUTES_ARCHIVE = env_variables.route_archives
 
 
 def download_trips_data(url, archive_loc):
@@ -61,10 +28,10 @@ def download_trips_data(url, archive_loc):
     Once a day check file - if new file has been found, update the list and save new file and start extraction to db
     """
     # Step 1: download list:
-    url_zip_link = r'https://www.ztm.poznan.pl/otwarte-dane/gtfsfiles/'
+    url_zip_link = env_variables.all_urls_link
     file_names = FilesToolBox.WebSearcher.file_names_column_table_searcher(url_zip_link)
     # Step 2: check list with already downloaded files:
-    files_in_dir = [f for f in os.listdir(url) if os.path.isfile(os.path.join(archive_loc, f))]
+    files_in_dir = [f for f in os.listdir(archive_loc) if os.path.isfile(os.path.join(archive_loc, f))]
     # Step 3: if given .zip file is not in our archive_loc, download it and save in archive_loc
     for file in file_names:
         if file in files_in_dir:
@@ -75,27 +42,12 @@ def download_trips_data(url, archive_loc):
                 with open(archive_loc, 'wb') as save_file:
                     for chunk in response.iter_content(chunk_size=1024):
                         save_file.write(chunk)
-                print(f"Pobrano plik: {file}")
+                print(f"Downloaded a file: {file}")
+                new_data = ReadZip(response.content).read_data_from_zip()
             else:
                 print(f"Error during .zip download, error code: {response.status_code}")
-                # raise requests.exceptions.HTTPError("Error during file download")
+                new_data = None
+                raise requests.exceptions.HTTPError("Error during file download")
     # Step 4 (if there is a new list) save file, start extraction to db:
-
-
-
-def download_vehicle_data(url):
-    """
-    Run functions to download data about trips from ZTM services
-    :param url: url for data
-    :return: None or ValueError if data download or save failed
-    """
-    pass
-
-
-def trips_data_checker(url):
-    """
-    Check date of last .zip with trips information. If new file has been detected, download it to server
-    :param url: url for data
-    :return: None or Error if data download failed
-    """
-
+    # This step should be made with step no. 3 - new file after save need to be sent to db
+    return new_data

@@ -84,7 +84,7 @@ def common_test_1():
 
 
 def common_test_2():
-    import data_collector_poznan.src.data_manager as data_manager
+    import data_collector_poznan.src.gather.feeds_gater as data_manager
     from shared.tools import env_os_variables
     data_manager.download_trips_data(env_os_variables.dc_zip_url)
 

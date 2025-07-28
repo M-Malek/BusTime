@@ -132,13 +132,15 @@ class PrepareZip(FilesToolBox):
 #     plik feed_info potem porównuje z tym co już jest w bazie i dopiero potem zapisuje zmiany (jeżeli są konieczne)
 
 
-class FeedFile:
-    def __init__(self, response):
-        # self.response = io.BytesIO(response.content)
-        self.feed = gtfs_realtime_pb2.FeedMessage()
-        self.feed_content = self.feed.ParseFromString(response.content)
-        print(self.feed_content)
-
-    def prepare_pb(self):
-        for entity in self.feed.entity:
-            print(entity)
+def prepare_feeds(data):
+    prepared_data = {}
+    for entry in data.entity:
+        if entry.HasField('entity'):
+            timestamp = entry.timestamp
+            trip_id = entry.emtity.vehicle.trip.trip_id
+            vehicle_id = entry.vehicle.vehicle.id
+            lat = entry.vehicle.position.latitiude
+            lng = entry.vehicle.position.longitude
+            current_stop = entry.vehicle.current_stop_sequence
+        # Add data to prepared data - one entry = all data from one loop
+    print(data)
