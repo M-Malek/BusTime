@@ -45,4 +45,8 @@ schedules_downloader has been downloaded
 New and old schedules should be saved in database. Storing old .zip can be resource-hungry (one .zip weight ca. 7 MB)
 Old .zip as archive can be downloaded once and add as old route's path at a later date as feature (check old schedules
 and routes)
-
+----------------------------
+?2025-07-31
+?Problem description:
+No Polish letters during .zip encoding!
+?Problem potential solution: simple, change encoding

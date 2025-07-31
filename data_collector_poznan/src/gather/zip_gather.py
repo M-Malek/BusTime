@@ -5,6 +5,8 @@ Downloading .zip with routes data
 import requests
 
 import shared.tools.env_os_variables as env_variables
+import io
+
 # GLOBALS:
 ROUTES_ARCHIVE = env_variables.route_archives
 
@@ -73,9 +75,10 @@ def schedules_downloader(url):
     :param url: link to URL with data
     :return: downloaded data as ???
     """
-    response = requests.get()
+    response = requests.get(url)
     if response.status_code == 200:
-        return response
+        return io.BytesIO(response.content)
+        # return response.content
     else:
         raise requests.exceptions.HTTPError()
 
