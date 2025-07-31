@@ -15,10 +15,12 @@ def test_one():
     """
     time1 = datetime.datetime.now()
     test_file = schedules_downloader(env_variables.route_archives)
-    test_data_trips, test_data_times = schedules_collector(test_file)
-    # Print downloaded data
-    print(test_data_times.head(15))
-    print(test_data_trips.head(15))
+    # test_data_trips, test_data_times = schedules_collector(test_file)
+    # # Print downloaded data
+    # print(test_data_times.head(15))
+    # print(test_data_trips.head(15))
+    test_data = schedules_collector(test_file)
+    print(test_data)
 
 
 test_one()

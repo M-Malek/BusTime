@@ -43,4 +43,38 @@ def schedules_collector(zip_file):
     for route_id in trips['route_id'].unique():
         route_trips = trips[trips['route_id'] == route_id]
 
-    return trips, stop_times
+        for _, trip in route_trips.iterrows():
+            trip_id = trip['trip_id']
+            shape_id = trip['shape_id']
+            direction_id = trip['direction_id']
+
+            # Pobieranie przystanków dla danego trip_id
+            trip_stops = stop_times[stop_times['trip_id'] == trip_id].sort_values('stop_sequence')
+
+            ready_stops = []
+            for _, stop_time in trip_stops.iterrows():
+                stop_id = stop_time['stop_id']
+                stop_info = stops[stops['stop_id'] == stop_id].iloc[0]
+
+                stop_data = {
+                    "stop_id": stop_id,
+                    "stop_name": stop_info['stop_name'],
+                    "departure_time": stop_time['departure_time'],
+                    "stop_sequence": int(stop_time['stop_sequence']),
+                    "location": {
+                        "lat": float(stop_info['stop_lat']),
+                        "lng": float(stop_info['stop_lon'])
+                    }
+                }
+                ready_stops.append(stop_data)
+
+            trip_data = {
+                "route_id": str(route_id),
+                "trip_id": trip_id,
+                "shape_id": shape_id,
+                "direction_id": int(direction_id),
+                "stops": stops
+            }
+            result.append(trip_data)
+
+    return result
