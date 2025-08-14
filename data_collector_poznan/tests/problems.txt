@@ -49,4 +49,13 @@ and routes)
 ?2025-07-31
 ?Problem description:
 No Polish letters during .zip encoding!
-?Problem potential solution: simple, change encoding
+?Problem potential solution: simple, change encoding.
+?Problem final solution: Using Nodepad++ I read one of file. Notepad++ detected an ut-8-com encoding. I set encoding
+for files as utf-8-sig. Everything works fine.
+?Problem end date: 2025-08-02
+----------------------------
+?2025-08-02
+?Problem description:
+zip_collector.py -> schedules_collector: function has bad optimization. It took more than an hour to take data (all
+tests with test_one() in sip_collector_test.py has been aborted.
+?Problem potential solutions: changing function with help of ChatGPT. Learned about code optimization.
