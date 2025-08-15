@@ -144,22 +144,27 @@ class SchedulesCollector:
     def __init__(self, zip_file):
         # Load raw data
         with zipfile.ZipFile(zip_file) as raw_file:
+            # Files needed to being preprocessed before use:
             self.trips = pd.read_csv(raw_file.open("trips.txt"), encoding="utf-8-sig", sep=',')
             self.stop_times = pd.read_csv(raw_file.open("stop_times.txt"), encoding="utf-8-sig", sep=',')
             self.stops = pd.read_csv(raw_file.open("stops.txt"), encoding="utf-8-sig", sep=',')
+            # Files needed to import without changes
+            self.shapes = pd.read_csv(raw_file.open("shapes.txt"), encoding="utf-8-sig", sep=',')
             raw_file.close()
 
         # Debug:
-        print(f"Trips: {type(self.trips)}")
-        print(f"Stops: {type(self.stops)}")
-        print(f"Stop_times: {type(self.stop_times)}")
+        # print(f"Trips: {type(self.trips)}")
+        # print(f"Stops: {type(self.stops)}")
+        # print(f"Stop_times: {type(self.stop_times)}")
 
         # Save prepared data:
-        self.stops_locations = self.load_stops()
-        self.basic_information = self.load_basic_information()
-        self.vehicle_times = self.load_stop_times()
+        # self.stops_locations = self.load_stops()
+        # self.basic_information = self.load_basic_information()
+        # self.vehicle_times = self.load_stop_times()
 
         self.trips = self.load_basic_information()
+        self.stop_times = self.load_stop_times()
+        self.stops = self.load_stops()
 
     def data_presentation(self):
         """
@@ -186,7 +191,7 @@ class SchedulesCollector:
         Prepare file "trips.txt" by extracting the appropriate data
         :return: pandas.DataFrame with data: route_id, trip_id, shape_id, direction_id
         """
-        return self.trips.drop(["route_id", "trip_headsign", "brigade"], axis=1)
+        return self.trips.drop(["brigade"], axis=1)
 
     def load_stop_times(self):
         """
@@ -196,5 +201,36 @@ class SchedulesCollector:
         return self.stop_times.drop(["pickup_type", "drop_off_type"], axis=1)
 
     def prepare_vehicle_data_set(self):
-        pass
+        """
+        Prepare dataset with all necessary information for all routes
+        :return: four datasets as pandas DataFrame
+        """
+        # 1. Prepare set of basic information's:
+        # line (service_id) number: shape_id (route identifier)
+        line_routes_info = (
+            self.trips.groupby("service_id")
+                .apply(lambda g: [
+                {"shape_id": sid, "tripy": list(sub["trip_id"])}
+                for sid, sub in g.sort_values(["shape_id", "trip_id"], kind="stable")
+                       .groupby("shape_id")
+            ])
+                .reset_index()
+                .rename(columns={"service_id": "service_id", 0: "lines"})
+        )
+        # print(line_routes_info)
+
+        # 2. Prepare shapes information's:
+        # for each shape create a set of data: stop sequence number,his longitude and latitude
+        # Grouping shapes by shape_id gives us ready set of data
+        shapes = self.shapes.groupby("shape_id")
+
+        # 3. Prepare stops information's: prepared when data has been downloaded
+
+        # 4. Prepare stops times information's:
+        # Grouping stop times by trip_id gives us ready set of data
+        stop_times = self.stop_times.groupby("trip_id")
+
+        # 5. Return prepared data:
+        return line_routes_info, self.stops, shapes, stop_times
+
 

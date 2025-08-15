@@ -3,6 +3,8 @@ Test zip_collector.py
 @M-Malek
 """
 import datetime
+import sys
+
 from data_collector_poznan.src.parser.zip_collector import schedules_collector, schedules_collector2
 from data_collector_poznan.src.gather.zip_gather import schedules_downloader
 import shared.tools.env_os_variables as env_variables
@@ -78,12 +80,15 @@ def test_four():
     time4 = datetime.datetime.now()
     # test.data_presentation()
     print(f"Data to pandas Dataframe in {time4-time3}")
-    stops = test.stops_locations
-    trips = test.trips
-    print(trips.head(10))
-    # print(stops.head(10))
-    # basic_info = test.load_basic_information()
-    # print(basic_info.head(10))
+    time5 = datetime.datetime.now()
+    line_routes_info, stops, shapes, stop_times = test.prepare_vehicle_data_set()
+    print(f"Type of line_routes_info: {type(line_routes_info)}, size: {sys.getsizeof(line_routes_info)}")
+    print(f"Type of stops: {type(stops)}, size: {sys.getsizeof(stops)}")
+    print(f"Type of shapes: {type(shapes)}, size: {sys.getsizeof(shapes)}")
+    print(f"Type of stop_times: {type(stop_times)}, size: {sys.getsizeof(stop_times)}")
+    time6 = datetime.datetime.now()
+    print(f"Data prepared in time: {time6-time5}")
+    print(f"Total data processing time: {time6-time1}")
 
 
 # test_one()
