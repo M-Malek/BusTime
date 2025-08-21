@@ -20,8 +20,6 @@ def download_trips_data(url, archive_loc=None):
     :return: None or ValueError if data download or save failed
     """
     from data_collector_poznan.src.data_preparing import ReadZipData as ReadZip
-    import shared.tools.data_collector as data_collector
-    import shared.tools.env_os_variables as eov
     import shared.tools.filestoolbox as FilesToolBox
     import os
     import requests

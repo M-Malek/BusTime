@@ -9,137 +9,6 @@ import io
 import logging
 
 
-def schedules_collector(zip_file):
-    """
-    Decode and read .zip file to create schedule table for db
-    :param zip_file: downloaded .zip file with vehicles schedule
-    :return:
-    """
-    # Load data to pandas.Dataframe:
-    # Debug:
-    print("Starting read data from .zip")
-    with zipfile.ZipFile(zip_file) as raw_file:
-        # Load data from trips.txt:
-        # with raw_file.open("trips.txt") as raw_trips:
-        #     trips = pd.read_csv(raw_trips, encoding="utf-8-sig")
-        #     raw_trips.close()
-        trips = pd.read_csv(raw_file.open("trips.txt", encoding="utf-8-sig"))
-
-        # Load data from stop_times.txt:
-        # with raw_file.open('stop_times.txt') as raw_stop_times:
-        #     stop_times = pd.read_csv(raw_stop_times, encoding="utf-8-sig")
-        #     raw_stop_times.close()
-        stop_times = pd.read_csv(raw_file.open("stop_times.txt", encoding="utf-8-sig"))
-
-        # Load data from shapes.txt:
-        # with raw_file.open('shapes.txt') as raw_shapes:
-        #     shapes = pd.read_csv(raw_shapes, encoding="utf-8-sig")
-        #     raw_shapes.close()
-        shapes = pd.read_csv(raw_file.open("shapes.txt", encoding="utf-8-sig"))
-
-        # Load data from shapes.txt:
-        # with raw_file.open('stops.txt') as raw_stops:
-        #     stops = pd.read_csv(raw_stops, encoding="utf-8-sig")
-        #     raw_stops.close()
-        stops = pd.read_csv(raw_file.open("stops.txt", encoding="utf-8-sig"))
-
-    # Debug:
-    print("Data from .zip read!")
-    # Create result list:
-    result = []
-
-    # Prepare data:
-    # Debug
-    print("Start preparing data")
-    for route_id in trips['route_id'].unique():
-        route_trips = trips[trips['route_id'] == route_id]
-
-        # Debug:
-        print("Route_trips prepared")
-        # print(route_trips.head(10))
-
-        for _, trip in route_trips.iterrows():
-            trip_id = trip['trip_id']
-            shape_id = trip['shape_id']
-            direction_id = trip['direction_id']
-
-            # Pobieranie przystanków dla danego trip_id
-            trip_stops = stop_times[stop_times['trip_id'] == trip_id].sort_values('stop_sequence')
-
-            ready_stops = []
-            for _, stop_time in trip_stops.iterrows():
-                stop_id = stop_time['stop_id']
-                stop_info = stops[stops['stop_id'] == stop_id].iloc[0]
-
-                stop_data = {
-                    "stop_id": stop_id,
-                    "stop_name": stop_info['stop_name'],
-                    "departure_time": stop_time['departure_time'],
-                    "stop_sequence": int(stop_time['stop_sequence']),
-                    "location": {
-                        "lat": float(stop_info['stop_lat']),
-                        "lng": float(stop_info['stop_lon'])
-                    }
-                }
-                ready_stops.append(stop_data)
-                # print(stop_data)
-
-            trip_data = {
-                "route_id": str(route_id),
-                "trip_id": trip_id,
-                "shape_id": shape_id,
-                "direction_id": int(direction_id),
-                "stops": ready_stops
-            }
-            result.append(trip_data)
-
-    return result
-
-
-def schedules_collector2(zip_file):
-    logging.basicConfig(level=logging.INFO)
-
-    with zipfile.ZipFile(zip_file) as raw_file:
-        trips = pd.read_csv(raw_file.open("trips.txt"), encoding="utf-8-sig")
-        stop_times = pd.read_csv(raw_file.open("stop_times.txt"), encoding="utf-8-sig")
-        stops = pd.read_csv(raw_file.open("stops.txt"), encoding="utf-8-sig")
-
-    stops_dict = stops.set_index('stop_id').to_dict('index')
-    result = []
-
-    for route_id, route_trips in trips.groupby('route_id'):
-        for trip in route_trips.itertuples(index=False):
-            trip_id = trip.trip_id
-            shape_id = trip.shape_id
-            direction_id = trip.direction_id
-
-            trip_stops = stop_times[stop_times['trip_id'] == trip_id].sort_values('stop_sequence')
-
-            ready_stops = []
-            for stop_time in trip_stops.itertuples(index=False):
-                stop_info = stops_dict[stop_time.stop_id]
-                ready_stops.append({
-                    "stop_id": stop_time.stop_id,
-                    "stop_name": stop_info['stop_name'],
-                    "departure_time": stop_time.departure_time,
-                    "stop_sequence": int(stop_time.stop_sequence),
-                    "location": {
-                        "lat": float(stop_info['stop_lat']),
-                        "lng": float(stop_info['stop_lon'])
-                    }
-                })
-
-            result.append({
-                "route_id": route_id,
-                "trip_id": trip_id,
-                "shape_id": shape_id,
-                "direction_id": int(direction_id),
-                "stops": ready_stops
-            })
-
-    return result
-
-
 class SchedulesCollector:
     def __init__(self, zip_file):
         # Load raw data
@@ -157,11 +26,7 @@ class SchedulesCollector:
         # print(f"Stops: {type(self.stops)}")
         # print(f"Stop_times: {type(self.stop_times)}")
 
-        # Save prepared data:
-        # self.stops_locations = self.load_stops()
-        # self.basic_information = self.load_basic_information()
-        # self.vehicle_times = self.load_stop_times()
-
+        # Prepare data for files which need tobe prepared:
         self.trips = self.load_basic_information()
         self.stop_times = self.load_stop_times()
         self.stops = self.load_stops()
@@ -169,7 +34,7 @@ class SchedulesCollector:
     def data_presentation(self):
         """
         For debug: check downloaded data
-        :return:
+        :return: None
         """
         print("Trips:")
         print(self.trips.head(10))
@@ -210,7 +75,7 @@ class SchedulesCollector:
         line_routes_info = (
             self.trips.groupby("service_id")
                 .apply(lambda g: [
-                {"shape_id": sid, "tripy": list(sub["trip_id"])}
+                {"shape_id": sid, "trips": list(sub["trip_id"])}
                 for sid, sub in g.sort_values(["shape_id", "trip_id"], kind="stable")
                        .groupby("shape_id")
             ])

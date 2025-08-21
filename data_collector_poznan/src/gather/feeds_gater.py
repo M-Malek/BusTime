@@ -32,41 +32,5 @@ def download_vehicle_data(url):
 
     return data
 
-    # 3. Prepare feeds.pb - extract only requested data
-    # Data extracted from feeds.pb file
-    """
-    {
-    "vehicle_id": "505",
-    "trip_id": "T12_20250624_001",
-    "timestamp": "2025-06-24T08:07:30Z",
-    "lat": 52.4123,
-    "lng": 16.9312,
-    "delay_seconds": 120
-    }
-    Wygląd pojedynczego wpisu pojazdu
-    entity {
-    id: "8323"
-    trip_update {
-        trip {
-            trip_id: "5_2751480^+"
-            schedule_relationship: SCHEDULED
-            route_id: "835"
-            }
-    stop_time_update {
-      stop_sequence: 4
-      arrival {
-        delay: 263
-      }
-      schedule_relationship: SCHEDULED
-        }
-    vehicle {
-      id: "8323"
-      label: "835/22"
-    }
-    timestamp: 1751301778
-    }
-    }
-
-    """
 
 
