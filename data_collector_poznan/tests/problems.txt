@@ -59,3 +59,9 @@ for files as utf-8-sig. Everything works fine.
 zip_collector.py -> schedules_collector: function has bad optimization. It took more than an hour to take data (all
 tests with test_one() in sip_collector_test.py has been aborted.
 ?Problem potential solutions: changing function with help of ChatGPT. Learned about code optimization.
+?Problem final solution: Rewriting code, created ScheduleCollector class in zip_collector.py.
+Able to prepared data on workdesk in 57 s.
+It's necessary to check work of ScheduleCollector class on low-spec device like Raspberry Pi Zero 2.
+---------------------------
+?2025-09-07
+?

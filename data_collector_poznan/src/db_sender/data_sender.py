@@ -16,49 +16,45 @@ from data_collector_poznan.src.gather.zip_gather import schedules_downloader
 from shared.tools.env_os_variables import feed_link, vehicle_link
 
 
-def connection(uri, sending_type=1):
+def connection_checker(uri):
     """
-    Establish connection with server and save data
+    Check connection with database
     :param uri: connection string
-    :param type: type of sender connection: 0 - save all, 1 - save vehicles, 2 - save schedules, default: 1
+    :param sending_type: type of sender connection: 0 - save all, 1 - save vehicles, 2 - save schedules, default: 1
     :return: Data saved to db if connection was successfully; Exception e if connection failed
     """
     client = MongoClient(uri, server_api=ServerApi('1'))
     try:
         client.admin.command('ping')
         print("Connection successfully achieved!")
-        if sending_type == 0:
-            save_vehicles(client, vehicle_link, feed_link)
-            save_timetables(client)
-        elif sending_type == 1:
-            save_vehicles(client, vehicle_link, feed_link)
-        elif sending_type == 2:
-            save_timetables(client)
         client.close()
     except Exception as e:
         print("An error during a connection: " + e)
 
 
-def save_vehicles(client, v_link, f_link):
+def save_vehicles(uri, data):
     """
-    Każda z opcji danych musi mieć własny, osobny save! nie jedna funkcja od całości
-    Po zrobieniu klasy posprzątaj program ze zbędnych danych!
-    :param v_link: vehicle.pb url
-    :param f_link: feeds.pb url
-    :param client: MongoDB Client URI
+    Save vehicles information to database
+    :param uri: MongoDB Client URI
+    :param data: prepared Vehicle data
     :return: saving data in db
     """
-    vehicle = feeds_manager(v_link, f_link)
+    client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     collection = db_set["Vehicles"]
-    collection.insert_many(vehicle)
+    collection.insert_many(data)
+    client.close()
 
 
-def save_timetables(client, zip_link):
+def save_timetables(uri, data):
     """
     Save data from .zip file to database
-    :param client: MongoDB Client URI
-    :param zip_link: ZTM .zip
-    :return:
+    :param uri: MongoDB Client URI
+    :param data: prepared schedules data
+    :return: saving data in db
     """
-    pass
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    # db_set = client["Poznan"]
+    # collection = db_set["Vehicles"]
+    # collection.insert_many(data)
+    client.close()

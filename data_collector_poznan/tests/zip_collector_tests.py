@@ -43,16 +43,25 @@ def test_two():
     """
     test_file = schedules_downloader(env_variables.route_archives)
     test = SchedulesCollector(test_file)
+    time1 = datetime.datetime.now()
     line_routes_info, stops, shapes, stop_times = test.prepare_vehicle_data_set()
     # line_routes_info_sample = line_routes_info[0]
     # print(line_routes_info_sample)
     print(line_routes_info)
+    print("--------------------------")
+    print(stops)
+    print("--------------------------")
+    print(shapes)
+    print("--------------------------")
+    print(stop_times)
+    time2 = datetime.datetime.now()
+    print(f"Data preparation time: {time2-time1} s.")
     # assert type(line_routes_info) == "<class 'pandas.core.frame.DataFrame'>", "Wrong data type!"
     # assert type(stops) == "<class 'pandas.core.frame.DataFrame'>", "Wrong data type!"
     # assert type(shapes) == "<class 'pandas.core.frame.DataFrame'>", "Wrong data type!"
 
 
-test_one()
+# test_one()
 test_two()
 
 """

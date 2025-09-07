@@ -5,7 +5,6 @@ Main data collecting and parsing logic - works for ZTM Poznań
 
 # Downloading data:
 from data_collector_poznan.src.gather.zip_gather import schedules_downloader
-from data_collector_poznan.src.gather.feeds_gater import download_vehicle_data
 
 # Data parsing:
 from data_collector_poznan.src.parser.zip_collector import SchedulesCollector
@@ -17,16 +16,21 @@ import shared.tools.env_os_variables as env_var
 # Normal lib:
 import time
 
+# Data to db saving:
+from data_collector_poznan.src.db_sender.data_sender import connection_checker, save_vehicles, save_timetables
+
 
 def vehicles():
     # Import data:
-    vehicle_raw_data = download_vehicle_data(env_var.vehicle_link, env_var.feed_link)
-
+    vehicle_raw_data = feeds_manager(env_var.vehicle_link, env_var.feed_link)
+    connection_checker()
+    save_vehicles(env_var.db_uri, vehicle_raw_data)
 
 
 def schedules():
     schedules_raw_data = schedules_downloader(env_var.dc_zip_url)
-    line_routes_info, stops, shapes, stop_times = SchedulesCollector(schedules_raw_data).prepare_vehicle_data_set()
+    line_routes_info, shapes, stop_times = SchedulesCollector(schedules_raw_data).prepare_vehicle_data_set()
+    save_vehicles(env_var.db_uri, line_routes_info, shapes, stop_times)
 
 
 

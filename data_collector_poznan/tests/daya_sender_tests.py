@@ -1,4 +1,4 @@
-from data_collector_poznan.src.db_sender.data_sender import connection
+from data_collector_poznan.src.db_sender.data_sender import database_saver
 
 
 # Test 1: try connection to data_server
@@ -8,9 +8,9 @@ def sender_test_1():
     :return: Log "Connection successfully achieved!" if connection was successfully.
     """
     uri = "here pass connection string!"
-    connection(uri)
+    database_saver(uri,,,
 
-sender_test_1()
+    sender_test_1()
 
 """
 Tests result:

@@ -2,6 +2,7 @@
 Prepare downloaded .zip file
 @M-Malek
 """
+import datetime
 import zipfile
 import pandas
 import pandas as pd
@@ -65,7 +66,7 @@ class SchedulesCollector:
         """
         return self.stop_times.drop(["pickup_type", "drop_off_type"], axis=1)
 
-    def prepare_vehicle_data_set(self):
+    def prepare_vehicle_data_set(self, with_stops=False):
         """
         Prepare dataset with all necessary information for all routes
         :return: four datasets as pandas DataFrame
@@ -87,15 +88,42 @@ class SchedulesCollector:
         # 2. Prepare shapes information's:
         # for each shape create a set of data: stop sequence number,his longitude and latitude
         # Grouping shapes by shape_id gives us ready set of data
-        shapes = self.shapes.groupby("shape_id")
+        # shapes = (self.shapes.groupby("shape_id").apply(
+        #     lambda g: g[["shape_pt_lat", "shape_pt_lon", "shape_pt_sequence"]].to_dict(orient="records").to_dict()
+        # ).rename(columns={"shape_pt_lat": "shape_lat", "shape_pt_lon": "shape_lng", "shape_pt_sequence": "seq"})
+        # )
+        shapes_dict = {}
+        for shape_id, group in self.shapes.groupby("shape_id"):
+            shapes_dict[shape_id] = {
+                int(row["shape_pt_sequence"]): [row["shape_pt_lat"], row["shape_pt_lon"]]
+                for _, row in group.iterrows()
+            }
+
+        shapes = pd.DataFrame(list(shapes_dict.items()), columns=["shape_id", "route"])
+        # Debug:
+        # for shape_id, group in shapes:
+        #     print(f"--- {shape_id} ---")
+        #     print(group.head())
 
         # 3. Prepare stops information's: prepared when data has been downloaded
 
         # 4. Prepare stops times information's:
         # Grouping stop times by trip_id gives us ready set of data
-        stop_times = self.stop_times.groupby("trip_id")
+        # stop_times = self.stop_times.groupby("trip_id")
+        stop_times_dict = {}
+        for trip_id, group in self.stop_times.groupby("trip_id"):
+            stop_times_dict[trip_id] = {
+                int(row["stop_sequence"]): [str(row["arrival_time"]),
+                                            str(row["departure_time"]),
+                                            int(row["stop_id"])]
+                for _, row in group.iterrows()
+            }
+        stop_times = pd.DataFrame(list(stop_times_dict.items()), columns=["trip_id", "route_seq"])
 
         # 5. Return prepared data:
-        return line_routes_info, self.stops, shapes, stop_times
+        if with_stops:
+            return line_routes_info, self.stops, shapes, stop_times
+        else:
+            return line_routes_info, shapes, stop_times
 
 
