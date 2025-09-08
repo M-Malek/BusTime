@@ -63,5 +63,8 @@ tests with test_one() in sip_collector_test.py has been aborted.
 Able to prepared data on workdesk in 57 s.
 It's necessary to check work of ScheduleCollector class on low-spec device like Raspberry Pi Zero 2.
 ---------------------------
-?2025-09-07
-?
+?2025-09-08
+?Problem description:
+tests for main.py:
+ValueError: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+?Problem potential solution: probably SchedulesCollector final data have improper shape for database

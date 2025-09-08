@@ -20,8 +20,7 @@ def connection_checker(uri):
     """
     Check connection with database
     :param uri: connection string
-    :param sending_type: type of sender connection: 0 - save all, 1 - save vehicles, 2 - save schedules, default: 1
-    :return: Data saved to db if connection was successfully; Exception e if connection failed
+    :return: Information if connection was successfully or Exception e if connection failed
     """
     client = MongoClient(uri, server_api=ServerApi('1'))
     try:
@@ -36,8 +35,8 @@ def save_vehicles(uri, data):
     """
     Save vehicles information to database
     :param uri: MongoDB Client URI
-    :param data: prepared Vehicle data
-    :return: saving data in db
+    :param data: pandas.DataFrame: prepared Vehicle data
+    :return: nothing, saving data in db
     """
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
@@ -46,15 +45,35 @@ def save_vehicles(uri, data):
     client.close()
 
 
-def save_timetables(uri, data):
+def save_timetables(uri, data_lvi, data_sh, data_st):
     """
     Save data from .zip file to database
     :param uri: MongoDB Client URI
-    :param data: prepared schedules data
-    :return: saving data in db
+    :param data_lvi: pandas.DataFrame: prepared line route info data
+    :param data_sh: pandas.DataFrame: prepared shape data
+    :param data_st: pandas.DataFrame: prepared stops times data
+    :return: nothing, saving data in db
     """
     client = MongoClient(uri, server_api=ServerApi('1'))
-    # db_set = client["Poznan"]
-    # collection = db_set["Vehicles"]
-    # collection.insert_many(data)
+    db_set = client["Poznan"]
+    collection_lvi = db_set["Line_info"]
+    collection_lvi.insert_many(data_lvi)
+    collection_sh = db_set["Shapes"]
+    collection_sh.insert_many(data_sh)
+    collection_st = db_set["Stop_times"]
+    collection_st.insert_many(data_st)
+    client.close()
+
+
+def save_stops(uri, stops):
+    """
+    Save actual stops data to database
+    :param uri: MongoDB Client URI
+    :param stops: pandas.DataFrame: stops data
+    :return: nothing
+    """
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    db_set = client["Poznan"]
+    collection_lvi = db_set["Stops"]
+    collection_lvi.insert_many(stops)
     client.close()

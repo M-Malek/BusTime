@@ -17,7 +17,8 @@ import shared.tools.env_os_variables as env_var
 import time
 
 # Data to db saving:
-from data_collector_poznan.src.db_sender.data_sender import connection_checker, save_vehicles, save_timetables
+from data_collector_poznan.src.db_sender.data_sender import connection_checker, save_vehicles
+from data_collector_poznan.src.db_sender.data_sender import save_timetables, save_stops
 
 
 def vehicles():
@@ -30,7 +31,15 @@ def vehicles():
 def schedules():
     schedules_raw_data = schedules_downloader(env_var.dc_zip_url)
     line_routes_info, shapes, stop_times = SchedulesCollector(schedules_raw_data).prepare_vehicle_data_set()
-    save_vehicles(env_var.db_uri, line_routes_info, shapes, stop_times)
+    save_timetables(env_var.db_uri, line_routes_info, shapes, stop_times)
+
+
+def stops():
+    schedules_raw_data = schedules_downloader(env_var.dc_zip_url)
+    stops_data = SchedulesCollector(schedules_raw_data).stops
+    # Debug:
+    # print(stops_data.to_dict())
+    save_stops(env_var.db_uri, stops_data)
 
 
 
