@@ -1,5 +1,5 @@
 """
-Connect to MOngoDB database and save data:
+Connect to MongoDB database and save data:
 - most actual timetables to Poznan/ZTM
 - vehicles data once a 30 sec. to Poznan/Vehicles
 """
@@ -41,7 +41,7 @@ def save_vehicles(uri, data):
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     collection = db_set["Vehicles"]
-    collection.insert_many(data)
+    collection.insert_many(data.to_dict("records"))
     client.close()
 
 
@@ -57,11 +57,11 @@ def save_timetables(uri, data_lvi, data_sh, data_st):
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     collection_lvi = db_set["Line_info"]
-    collection_lvi.insert_many(data_lvi)
+    collection_lvi.insert_many(data_lvi.to_dict("records"))
     collection_sh = db_set["Shapes"]
-    collection_sh.insert_many(data_sh)
+    collection_sh.insert_many(data_sh.to_dict("records"))
     collection_st = db_set["Stop_times"]
-    collection_st.insert_many(data_st)
+    collection_st.insert_many(data_st.to_dict("records"))
     client.close()
 
 
@@ -74,6 +74,8 @@ def save_stops(uri, stops):
     """
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
-    collection_lvi = db_set["Stops"]
-    collection_lvi.insert_many(stops)
+    collection_st = db_set["Stops"]
+    collection_st.insert_many(stops.to_dict("records"))
+    # for index, row in stops.iterrows():
+    #     collection_st.insert_one(row)
     client.close()

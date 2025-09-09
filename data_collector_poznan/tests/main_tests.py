@@ -6,6 +6,7 @@ from data_collector_poznan.src.main import stops
 from data_collector_poznan.src.db_sender.data_sender import connection_checker
 import pymongo
 from shared.tools.env_os_variables import db_uri
+import data_collector_poznan.main
 
 
 def test_one():
@@ -22,4 +23,14 @@ def test_one():
     print(result)
 
 
-test_one()
+def test_two():
+    """
+    Testing how its work. Abort test after 20 minutes
+    :return:
+    """
+    if __name__ == '__main__':
+        data_collector_poznan.main
+
+
+# test_one()
+test_two()
