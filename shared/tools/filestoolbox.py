@@ -172,3 +172,22 @@ class WebSearcher:
         download_url = r"https://www.ztm.poznan.pl/pl/dla-deweloperow/getGTFSFile/?file="
         downloaded_file = requests.get(download_url+dates)
         return downloaded_file
+
+
+def in_time_period(time_start, time_end, time_now):
+    """
+    Check if given hour is in given time period
+    :param time_start: start hour of time period,
+    :param time_end: end hour of time period
+    :param time_now: hour to check
+    :return: True if time_now in given time period (time start to time_end)
+    """
+    # print("Debug")
+    # print(f"Start time: {time_start}")
+    # print(f"End time: {time_end}")
+    # print(f"Now: {time_now}")
+    if time_start < time_end:
+        return time_start <= time_now <= time_end
+    else:
+        # return time_start < time_now < time_end
+        return time_now >= time_start or time_now <= time_end

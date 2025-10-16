@@ -27,8 +27,10 @@ def connection_checker(uri):
         client.admin.command('ping')
         print("Connection successfully achieved!")
         client.close()
+        return True
     except Exception as e:
         print("An error during a connection: " + e)
+        return False
 
 
 def save_vehicles(uri, data):
@@ -38,6 +40,9 @@ def save_vehicles(uri, data):
     :param data: pandas.DataFrame: prepared Vehicle data
     :return: nothing, saving data in db
     """
+    if not connection_checker(uri):
+        print("Database currently unavailable. Vehicles save failed")
+        return None
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     collection = db_set["Vehicles"]
@@ -54,6 +59,9 @@ def save_timetables(uri, data_lvi, data_sh, data_st):
     :param data_st: pandas.DataFrame: prepared stops times data
     :return: nothing, saving data in db
     """
+    if not connection_checker(uri):
+        print("Database currently unavailable. Timetables save failed")
+        return None
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     collection_lvi = db_set["Line_info"]
@@ -72,6 +80,9 @@ def save_stops(uri, stops):
     :param stops: pandas.DataFrame: stops data
     :return: nothing
     """
+    if not connection_checker(uri):
+        print("Database currently unavailable. Stops save failed")
+        return None
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     collection_st = db_set["Stops"]
