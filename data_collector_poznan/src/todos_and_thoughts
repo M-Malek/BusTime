@@ -1,0 +1,72 @@
+[PL]
+Założenia i przemyślenia do programu. Skróty myślowe podawane jedynie w j.polskim
+[ENG]
+Assumptions and thoughts to program. Only in PL.
+
+Funkcja SchedulesCollector działa poprawnie, jednak 1 zapis danych z funkcji do bazy danych zajmuje prawie 50 MB
+Tymczasem pobrany ze strony ZTM plik .zip z danymi to jedyne 10 MB...
+NIE MA SENSU ZAPISYWAĆ tego w bazie danych...
+
+Data_sender zostaje uproszczony jedynie do zapisywania danych o pozycjach pojazdów.
+2 funkcje asynchroniczne:
+Funkcja 1: zapis danych o pozycjach pojazdów co 30 sekund
+Funkcja 2: pobranie i odczyt danych o rozkładzie jazdy pojazdów - osobny mikroserwis!
+
+Mikroserwis 0:
+Baza MongoDB postawiona na własnym sprzęcie (tym samym który będzie obsługiwał resztę serwisu)
+Dlaczego? Dla niezależności
+Opcja do rozważania w przypadku wzrostu popularności serwisu - pojedynczy, najprostszy klaster MongoDB może
+obsłużyć jedynie 4000 jednoczesnych połączeń - większa ilość użytkowników wywali system,
+
+1 mikroserwis:
+Funkcja main dla data_collector_poznan to jedynie funkcja do pobierania i zapisywania danych o pozycjach pojazdów!
+Przy okazji funkcja może logować stan bazy danych i programu
+I to jest 1 mikroserwis programu
+
+2 mikroserwis:
+Na dysku mamy zapisane wszystkie pliki .zip z rozkładami, dla ułatwienia są one w 1 folderze a na górze tego folderu
+jest plik .json
+W pliku .json są:
+słownik zawierające listy z: nazwą kodowa pliku .zip i data jego pobrania
+ 1 zmienna zawierające nazwy domyślne ZTM wszystkich pobranych plików - zmienna ZTM_timetables_dates
+ 1 zmienna opisująca nazwę najnowszego pliku z danymi (najświeżeszego pliku z danymi) - zmienna ZTM_timetables_actual
+Przy pomocy BS odczytujemy nazwy wszystkich plików .zip co jakiś czas (co 4h o 4 rano, 8 rano, 12, 16, 20 i 24,
+Jeżeli lista odczytana przez BS oraz lista ZTM_timetables_dates są identyczne to program oczekuje dalej do kolejnej
+godziny wywołania,
+Jeżeli listy są różne, to program pobiera najnowszy plik .zip, dopisuje go z nazwy do zmiennej ZTM_timetables_dates,
+archiwizuje w swoim folderze głównym wraz z dodaniem go do słownika z wszystkimi plikami a na koniec nazwę najnowszego
+pliku .zip wpisuje do zmiennej ZTM_timetables_actual
+
+3 mikroserwis:
+Mikroserwis pobiera do zmiennej vehicles_day_positions całą bazę danych pojazdów z kolekcji Vehicles
+Mikroserwis pobiera z najbardziej aktualnego pliku zip dane Stop_times, Shape i Trips
+Najpierw z pliku vehicles_day_positions wyciągamy wszystkie unikalne numery linii i numery tras po których poruszały
+się pojazdy,
+Dla tych wyjętych z pliku Vehicles danych pojazdów z plików Stop_times, Shape i Trips mikroserwis tworzy sobie
+zestawienie linii (tylko dla 77 linii ZTM Poznań, tu trzeba określić czy nie trzeba jeszcze jakiegoś pliku odczytać z
+zipa który pozwoli nam na określanie, czy danych pojazd należy do ZTM poznań czy nie),
+Zestawienie linii zawiera następujące dane (nazwa zestawienia: theoretical_ZTM_trips):
+numer linii,
+numer trasy,
+sekwencyjnie opisane przystanki: numer przystanku w sekwencji (1, 2, 3 itd), nazwę przystanku i jego pozycję(lat i lng),
+czas przyjazdu i odjazdu
+Potem serwis z pobranego pliku vehicles_day_positions program pobiera dane i robi im zestawienie na takiej samej
+zasadzie jak wcześniej:
+Zestawienie linii zawiera następujące dane (nazwa zestawienia: real_ZTM_trips):
+numer linii,
+numer trasy,
+sekwencyjnie opisane przystanki: numer przystanku w sekwencji (1, 2, 3 itd), pozycja (lat i lng), czas
+Następnie program porównuje oba zestawienia, dopasowując pobrany pojazd z zestawienia real do zestawienia theoretical,
+szukane różnice to:
+różnica czasu w dotarciu do przystanków z sekwencji - czyli spóźnienie pojazdu,
+numer sekwencji dla którego nastąpiło 5 największych opóźnienie pojazdu z odczytaniem przystanku (nazwy i lokalizacji),
+Sekwencje dopasowane powinny zostać w jakiś sposób ze sobą porównane a te nierozpoznane opisane jako nieodbyty kurs na
+zasadzie: policzenia ilości kursów które wypadły danego dnia z zapisem godzin odjazdu ze stacji 0 które wypadły,
+W bazie danych dla statystyk linii zapisujemy:
+średnie opóźnienie,
+ranking przystanków krytycznych dla których autobus spóźnia się najczęściej,
+ilość kursów które wypadły w ujęciu dziennym, tygodniowym, miesięcznym, rocznym
+
+4 mikroserwis:
+Prezentacja graficzna danych o pozycjach pojazdów pobieranych z bazy danych (a zapewnianych przez mikroserwis 1) oraz
+prezentacja danych opracowanych przez mikroserwis 3.

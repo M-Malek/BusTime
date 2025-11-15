@@ -191,3 +191,24 @@ def in_time_period(time_start, time_end, time_now):
     else:
         # return time_start < time_now < time_end
         return time_now >= time_start or time_now <= time_end
+
+
+def data_for_db_cleaner(dataset):
+    """
+    Cleaner of data for MongoDB database: Mongo database cannot convert numpy value types
+    :param dataset: dataset to clean, pandas.DataFrame
+    :return: cleaned dataset as pandas.DataFrame
+    """
+    import pandas as pd
+    import numpy as np
+    # Zamień NaN i NaT na None
+    df = dataset.replace({np.nan: None, pd.NaT: None})
+
+    # Dla każdej kolumny wykonaj mapowanie wartości
+    for col in df.columns:
+        df[col] = (
+            df[col]
+            .map(lambda x: x.item() if isinstance(x, (np.generic,)) else x)
+            .map(lambda x: x.to_pydatetime() if isinstance(x, pd.Timestamp) else x)
+        )
+    return df

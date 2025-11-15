@@ -15,7 +15,11 @@ from data_collector_poznan.src.gather.zip_gather import schedules_downloader
 # env os variables:
 from shared.tools.env_os_variables import feed_link, vehicle_link
 
+# Tools:
+from shared.tools.filestoolbox import data_for_db_cleaner
 
+
+# Small companion function to db management and connection check
 def connection_checker(uri):
     """
     Check connection with database
@@ -32,6 +36,25 @@ def connection_checker(uri):
         print("An error during a connection: " + e)
         return False
 
+
+def db_data_wipeout(uri, tables):
+    if not connection_checker(uri):
+        print("Database currently unavailable. Data wipeout failed")
+        return None
+
+    print(f"Starting data wipeout from collections: {tables}")
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    db_set = client["Poznan"]
+    for table in tables:
+        # Debug:
+        # print(f"{table} type: {type(table)}")
+        collection = db_set[table]
+        collection.drop()
+    client.close()
+    print(f"Data wipe outed!")
+
+
+# Data saving functions
 
 def save_vehicles(uri, data):
     """
@@ -62,6 +85,14 @@ def save_timetables(uri, data_lvi, data_sh, data_st):
     if not connection_checker(uri):
         print("Database currently unavailable. Timetables save failed")
         return None
+    # Cleaning data:
+    data_lvi = data_for_db_cleaner(data_lvi)
+    data_st = data_for_db_cleaner(data_st)
+    data_sh = data_for_db_cleaner(data_sh)
+    # Debug
+    print(data_lvi)
+    a = input("Press a Enter to continue")
+
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     collection_lvi = db_set["Line_info"]
@@ -89,4 +120,34 @@ def save_stops(uri, stops):
     collection_st.insert_many(stops.to_dict("records"))
     # for index, row in stops.iterrows():
     #     collection_st.insert_one(row)
+    client.close()
+
+
+def save_data(uri, data_stop_time, data_shapes, data_trips, with_wipeout=False):
+    """
+    Save data (second version of saving) to database
+    :param with_wipeout: bool, True/False: if True, all data from tables Stop_time, Shapes and Trips will be
+    deleted before saving new data
+    :param uri: Connection Link
+    :param data_stop_time: Stop times data from ZTM
+    :param data_shapes: Shapes data from ZTM
+    :param data_trips: Trips data from ZTM
+    :return:
+    """
+    if not connection_checker(uri):
+        print("Database currently unavailable. Stops save failed")
+        return None
+
+    if with_wipeout:
+        db_data_wipeout(uri, ["Stop_times", "Shapes", "Trips"])
+
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    db_set = client["Poznan"]
+
+    collection_stops = db_set["Stop_times"]
+    collection_stops.insert_many(data_stop_time.to_dict("records"))
+    collection_shapes = db_set["Shapes"]
+    collection_shapes.insert_many(data_shapes.to_dict("records"))
+    collection_trips = db_set["Trips"]
+    collection_trips.insert_many(data_trips.to_dict("records"))
     client.close()

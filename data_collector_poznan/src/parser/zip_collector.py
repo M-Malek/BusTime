@@ -28,6 +28,15 @@ class SchedulesCollector:
         # print(f"Stop_times: {type(self.stop_times)}")
 
         # Prepare data for files which need tobe prepared:
+        # self.trips = self.load_basic_information()
+        # self.stop_times = self.load_stop_times()
+        # self.stops = self.load_stops()
+
+    def load_data_for_adv_data_prep(self):
+        """
+        Prepare data for files which need to be prepared:
+        :return: None
+        """
         self.trips = self.load_basic_information()
         self.stop_times = self.load_stop_times()
         self.stops = self.load_stops()
@@ -73,6 +82,7 @@ class SchedulesCollector:
         """
         # 1. Prepare set of basic information's:
         # line (service_id) number: shape_id (route identifier)
+        self.load_data_for_adv_data_prep()
         line_routes_info = (
             self.trips.groupby("service_id")
                 .apply(lambda g: [
@@ -126,4 +136,18 @@ class SchedulesCollector:
         else:
             return line_routes_info, shapes, stop_times
 
-
+    def prepare_vehicle_data_set2(self, with_stops=False):
+        """
+        Prepare main data set - version 2, no pre-preparing data
+        :param with_stops:
+        :return:
+        """
+        if with_stops:
+            return self.stop_times.loc[:, ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence"]], \
+                   self.trips.loc[:, ["trip_id", "trip_headsign", "direction_id", "shape_id"]],\
+                   self.stops.loc[:, ["stop_id", "stop_code", "stop_name", "stop_lat", "stop_lon", "zone_id"]],\
+                   self.shapes.loc[:, ["shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence"]]
+        else:
+            return self.stop_times.loc[:, ["trip_id", "arrival_time", "departure_time", "stop_id", "stop_sequence"]], \
+                   self.trips.loc[:, ["trip_id", "trip_headsign", "direction_id", "shape_id"]], \
+                   self.shapes.loc[:, ["shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence"]]
