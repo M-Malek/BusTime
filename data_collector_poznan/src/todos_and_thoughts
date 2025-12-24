@@ -22,6 +22,7 @@ obsłużyć jedynie 4000 jednoczesnych połączeń - większa ilość użytkowni
 Funkcja main dla data_collector_poznan to jedynie funkcja do pobierania i zapisywania danych o pozycjach pojazdów!
 Przy okazji funkcja może logować stan bazy danych i programu
 I to jest 1 mikroserwis programu
+Mikroserwis 1 osiągnął status gotowości: czas na testy, potem przechodzimy do poprawy mikroserwisu 2,
 
 2 mikroserwis:
 Na dysku mamy zapisane wszystkie pliki .zip z rozkładami, dla ułatwienia są one w 1 folderze a na górze tego folderu
