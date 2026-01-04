@@ -8,6 +8,7 @@ import datetime
 import pandas
 
 from data_collector_poznan.src.gather.feeds_gater import download_vehicle_data
+from shared.tools.log_logging import main_logger
 
 
 def feeds_manager(url_vehicle, url_feeds):
@@ -26,10 +27,12 @@ def feeds_manager(url_vehicle, url_feeds):
 
     # Error check: if data download failed - data_vehicle and data_feeds == None, return error log and exit
     if data_vehicle is None or data_feeds is None:
-        print(f"{datetime.datetime.now()} - Error during data download! Data skipped!")
+        # print(f"{datetime.datetime.now()} - Error during data download! Data skipped!")
+        main_logger("error", f"Error during data download! Data skipped!")
         return None
+
     # Debug: time measurements:
-    time2 = datetime.datetime.now()
+    # time2 = datetime.datetime.now()
     # "Storages" for raw data:
     data_vehicle_raw = []
     data_feeds_raw = []
@@ -38,7 +41,7 @@ def feeds_manager(url_vehicle, url_feeds):
     # Save data as new dict in data_vehicle_raw
 
     # Debug: time measurements:
-    time3 = datetime.datetime.now()
+    # time3 = datetime.datetime.now()
     for entity in data_vehicle.entity:
         if not entity.HasField("vehicle"):
             continue
@@ -60,13 +63,13 @@ def feeds_manager(url_vehicle, url_feeds):
         data_vehicle_raw.append(ready_set)
 
     # Debug: time measurements:
-    time4 = datetime.datetime.now()
+    # time4 = datetime.datetime.now()
 
     # 2. Take data from feeds_pb: id, trip_id, seq, delay, timestamp
     # Save data as new dict in data_feeds_raw
 
     # Debug: time measurements:
-    time5 = datetime.datetime.now()
+    # time5 = datetime.datetime.now()
     # print(data_feeds)
     for entity in data_feeds.entity:
         if not entity.HasField("trip_update"):
@@ -128,18 +131,18 @@ def feeds_manager(url_vehicle, url_feeds):
             "lat": vehicle["lat"] if vehicle else None,
             "lng": vehicle["lng"] if vehicle else None,
             "timestamp": vehicle["timestamp"] if vehicle else (feed["timestamp"] if feed else None),
-            # "seq": feed["seq"] if feed else None,
+            "seq": feed["seq"] if feed else None,
             # Only for debug
-            "seq": feed["seq"] if feed else "No feed file",
-            # "delay": feed["delay"] if feed else None,
+            # "seq": feed["seq"] if feed else "No feed file",
+            "delay": feed["delay"] if feed else None,
             # Only for debug
-            "delay": feed["delay"] if feed else "No feed file",
+            # "delay": feed["delay"] if feed else "No feed file",
         }
         combined_data.append(combined_entry)
 
     # Debug: time measurements
     time7 = datetime.datetime.now()
-    print(f"Length data_vehicle: {len(data_vehicle_raw)}, length data_feed: {len(data_feeds_raw)}")
+    # print(f"Length data_vehicle: {len(data_vehicle_raw)}, length data_feed: {len(data_feeds_raw)}")
     # print(f"Debug: time:"
     #       f"Start time: {time1}\n"
     #       f"Data downloaded: {time2-time1}\n"

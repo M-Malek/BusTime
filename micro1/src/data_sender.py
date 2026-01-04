@@ -1,11 +1,13 @@
 """
-
+Data_sender file - check and establish connection with MongoDB, then save data to Vehicle table
 @M-Malek
 """
 
 # Libs
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+
+from shared.tools.log_logging import main_logger
 
 
 # Small companion function to db management and connection check
@@ -18,20 +20,24 @@ def connection_checker(uri):
     client = MongoClient(uri, server_api=ServerApi('1'))
     try:
         client.admin.command('ping')
-        print("Connection successfully achieved!")
+        # print("Connection successfully achieved!")
+        main_logger("info", "Test connection with MongoDB - success!")
         client.close()
         return True
     except Exception as e:
         print("An error during a connection: " + e)
+        main_logger("error", f"Error during connection with MongoDB: {e}")
         return False
 
 
 def db_data_wipeout(uri, tables):
     if not connection_checker(uri):
-        print("Database currently unavailable. Data wipeout failed")
+        # print("Database currently unavailable. Data wipeout failed")
+        main_logger("error", "Database currently unavailable. Data wipeout failed")
         return None
 
-    print(f"Starting data wipeout from collections: {tables}")
+    # print(f"Starting data wipeout from collections: {tables}")
+    main_logger("warning", f"Starting data wipeout from collections: {tables}")
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     for table in tables:
@@ -40,7 +46,8 @@ def db_data_wipeout(uri, tables):
         collection = db_set[table]
         collection.drop()
     client.close()
-    print(f"Data wipe outed!")
+    # print(f"Data wipe outed!")
+    main_logger("warning", "Data wipe outed!")
 
 
 def data_check(uri, tables):
@@ -51,7 +58,8 @@ def data_check(uri, tables):
     :return: list with data: each list element contains list of 5 data probe from tables described by tables
     """
     if not connection_checker(uri):
-        print("Database currently unavailable. Data wipeout failed")
+        # print("Database currently unavailable. Data wipeout failed")
+        main_logger("error", "Database currently unavailable. Data check failed")
         return None
 
     result_list = []
@@ -75,7 +83,8 @@ def save_vehicles(uri, data):
     :return: nothing, saving data in db
     """
     if not connection_checker(uri):
-        print("Database currently unavailable. Vehicles save failed")
+        # print("Database currently unavailable. Vehicles save failed")
+        main_logger("error", "Database currently unavailable. Data save to Vehicle table failed")
         return None
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
