@@ -1,0 +1,215 @@
+C:\Users\malek\Desktop\Dokumenty\Projekty\PythonPrograms\BusTime\venv\Scripts\python.exe C:/Users/malek/Desktop/Dokumenty/Projekty/PythonPrograms/BusTime/micro1/main.py
+Length data_vehicle: 242, length data_feed: 241
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:16:48.214570: Vehicles positions saved
+Length data_vehicle: 241, length data_feed: 240
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:18:00.638733: Vehicles positions saved
+Length data_vehicle: 240, length data_feed: 240
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:19:13.274158: Vehicles positions saved
+Length data_vehicle: 237, length data_feed: 239
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:20:25.450711: Vehicles positions saved
+Length data_vehicle: 239, length data_feed: 241
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:21:37.551022: Vehicles positions saved
+Length data_vehicle: 243, length data_feed: 240
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:22:49.550301: Vehicles positions saved
+Length data_vehicle: 237, length data_feed: 239
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:46:07.415520: Vehicles positions saved
+Length data_vehicle: 238, length data_feed: 239
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:47:19.672326: Vehicles positions saved
+Length data_vehicle: 239, length data_feed: 236
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:48:31.883644: Vehicles positions saved
+Length data_vehicle: 238, length data_feed: 238
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:49:44.248349: Vehicles positions saved
+Length data_vehicle: 235, length data_feed: 235
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:50:57.680983: Vehicles positions saved
+Length data_vehicle: 235, length data_feed: 235
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:52:09.728973: Vehicles positions saved
+Length data_vehicle: 236, length data_feed: 237
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:53:22.205651: Vehicles positions saved
+Length data_vehicle: 237, length data_feed: 239
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:54:34.323020: Vehicles positions saved
+Length data_vehicle: 239, length data_feed: 238
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:55:47.006172: Vehicles positions saved
+Length data_vehicle: 237, length data_feed: 236
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:56:59.552903: Vehicles positions saved
+Length data_vehicle: 239, length data_feed: 237
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:58:11.875266: Vehicles positions saved
+Length data_vehicle: 238, length data_feed: 237
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 12:59:24.102447: Vehicles positions saved
+Length data_vehicle: 236, length data_feed: 236
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:00:37.271522: Vehicles positions saved
+Length data_vehicle: 235, length data_feed: 237
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:01:49.497775: Vehicles positions saved
+Length data_vehicle: 239, length data_feed: 239
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:03:02.677994: Vehicles positions saved
+Length data_vehicle: 238, length data_feed: 239
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:04:15.235023: Vehicles positions saved
+Length data_vehicle: 239, length data_feed: 239
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:05:27.506824: Vehicles positions saved
+Length data_vehicle: 239, length data_feed: 238
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:06:39.584000: Vehicles positions saved
+Length data_vehicle: 237, length data_feed: 237
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:07:51.945500: Vehicles positions saved
+Length data_vehicle: 238, length data_feed: 237
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:09:04.192336: Vehicles positions saved
+Length data_vehicle: 237, length data_feed: 238
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:10:20.359724: Vehicles positions saved
+Length data_vehicle: 240, length data_feed: 240
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:11:32.862828: Vehicles positions saved
+Length data_vehicle: 241, length data_feed: 240
+Connection successfully achieved!
+An error during a connection: All nameservers failed to answer the query _mongodb._tcp.mpkstats.dxm5i.mongodb.net. IN SRV: Server Do53:192.168.1.1@53 answered [WinError 10051] Próba przeprowadzenia operacji, wykonywanej przez gniazdo, na nieosiągalnej sieci; Server Do53:192.168.8.1@53 answered [WinError 10051] Próba przeprowadzenia operacji, wykonywanej przez gniazdo, na nieosiągalnej sieci
+Length data_vehicle: 238, length data_feed: 239
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:51:13.376650: Vehicles positions saved
+Length data_vehicle: 240, length data_feed: 240
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:52:25.326968: Vehicles positions saved
+Length data_vehicle: 238, length data_feed: 240
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:53:37.409123: Vehicles positions saved
+Length data_vehicle: 239, length data_feed: 241
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 13:54:49.644606: Vehicles positions saved
+Length data_vehicle: 240, length data_feed: 241
+Connection successfully achieved!
+An error during a connection: All nameservers failed to answer the query _mongodb._tcp.mpkstats.dxm5i.mongodb.net. IN SRV: Server Do53:192.168.1.1@53 answered [WinError 10065] Próba przeprowadzenia operacji, wykonywanej przez gniazdo, na nieosiągalnym hoście; Server Do53:192.168.8.1@53 answered [WinError 10065] Próba przeprowadzenia operacji, wykonywanej przez gniazdo, na nieosiągalnym hoście
+Length data_vehicle: 116, length data_feed: 115
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 15:47:20.332266: Vehicles positions saved
+Length data_vehicle: 115, length data_feed: 114
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 15:48:31.483308: Vehicles positions saved
+Length data_vehicle: 114, length data_feed: 115
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 15:49:42.440006: Vehicles positions saved
+Length data_vehicle: 112, length data_feed: 113
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 15:50:53.730924: Vehicles positions saved
+Length data_vehicle: 114, length data_feed: 115
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 15:52:04.691939: Vehicles positions saved
+Length data_vehicle: 69, length data_feed: 69
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 20:24:35.528907: Vehicles positions saved
+Length data_vehicle: 70, length data_feed: 70
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 20:25:47.817227: Vehicles positions saved
+Length data_vehicle: 69, length data_feed: 69
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 20:26:59.030252: Vehicles positions saved
+Length data_vehicle: 68, length data_feed: 68
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 20:28:10.312327: Vehicles positions saved
+Length data_vehicle: 67, length data_feed: 68
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 20:29:21.671554: Vehicles positions saved
+Length data_vehicle: 68, length data_feed: 68
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 20:30:32.719098: Vehicles positions saved
+Length data_vehicle: 66, length data_feed: 64
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 20:31:43.769204: Vehicles positions saved
+Length data_vehicle: 65, length data_feed: 65
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 20:32:54.218303: Vehicles positions saved
+Length data_vehicle: 64, length data_feed: 49
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 21:39:54.896749: Vehicles positions saved
+Length data_vehicle: 48, length data_feed: 48
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 21:41:06.057580: Vehicles positions saved
+Length data_vehicle: 48, length data_feed: 46
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 21:42:16.807613: Vehicles positions saved
+Length data_vehicle: 47, length data_feed: 47
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 21:43:27.855760: Vehicles positions saved
+Length data_vehicle: 46, length data_feed: 47
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 21:44:38.286911: Vehicles positions saved
+Length data_vehicle: 47, length data_feed: 47
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 21:45:48.679845: Vehicles positions saved
+Length data_vehicle: 47, length data_feed: 47
+Connection successfully achieved!
+Connection successfully achieved!
+2025-12-24 21:46:59.486859: Vehicles positions saved

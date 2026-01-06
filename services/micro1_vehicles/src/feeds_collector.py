@@ -3,9 +3,11 @@ Manage downloaded feeds file
 @M-Malek
 """
 
-import datetime
+# Uncomment for time cheks
+# import datetime
 
-import pandas
+from pandas import DataFrame
+import datetime
 
 from data_collector_poznan.src.gather.feeds_gater import download_vehicle_data
 from shared.tools.log_logging import main_logger
@@ -21,7 +23,7 @@ def feeds_manager(url_vehicle, url_feeds):
 
     # Raw data:
     # Debug: time measurements:
-    time1 = datetime.datetime.now()
+    # time1 = datetime.datetime.now()
     data_vehicle = download_vehicle_data(url_vehicle)
     data_feeds = download_vehicle_data(url_feeds)
 
@@ -92,7 +94,7 @@ def feeds_manager(url_vehicle, url_feeds):
         })
 
     # Debug: time measurements:
-    time6 = datetime.datetime.now()
+    # time6 = datetime.datetime.now()
     # print(data_feeds_raw[2])
 
     # 3. Using route_id and id connect both list: save results as result list of dicts ready to save in db
@@ -151,7 +153,6 @@ def feeds_manager(url_vehicle, url_feeds):
     #       f"Start of reading feeds data: {time5}\n"
     #       f"Feeds data read in {time6-time5}\n"
     #       f"All data has been prepared in {time7-time1} seconds")
-    # Statistic for 100 runs: avg. seconds to prepare data (tested by data_collector_tests - test 1.
+    # Statistic for 100 runs: avg. seconds to prepare data (tested by data_collector_tests - test 1).
 
-    return pandas.DataFrame(combined_data)
-
+    return DataFrame(combined_data)

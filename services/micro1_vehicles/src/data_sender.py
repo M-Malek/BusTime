@@ -84,8 +84,8 @@ def save_vehicles(uri, data):
     """
     if not connection_checker(uri):
         # print("Database currently unavailable. Vehicles save failed")
-        main_logger("error", "Database currently unavailable. Data save to Vehicle table failed")
-        return None
+        # main_logger("error", "Database currently unavailable. Data save to Vehicle table failed")
+        raise Exception("Database currently unavailable. Data save to Vehicle table failed")
     client = MongoClient(uri, server_api=ServerApi('1'))
     db_set = client["Poznan"]
     collection = db_set["Vehicles"]

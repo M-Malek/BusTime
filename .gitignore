@@ -3,5 +3,5 @@
 /shared/tools/env_os_variables.py
 trip_updates(6).pb
 /.idea
-/micro1/log.txt
-/micro1/log_file.log
+/services/micro1_vehicles/log.txt
+/services/micro1_vehicles/log_file.log
