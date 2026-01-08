@@ -90,7 +90,6 @@ def data_check(uri, tables):
         result_list.append(random_docs)
     return result_list
 
-# possibly, completed
 
 # Main saving functions:
 # WARNING: replace uri on client to save resources with savings file basic operations!
