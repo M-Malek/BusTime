@@ -4,13 +4,30 @@ Data_sender file - check and establish connection with MongoDB, then save data t
 """
 
 # Libs
+import pymongo
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 from shared.tools.log_logging import main_logger
+from shared.tools.env_os_variables import db_uri
 
 
 # Small companion function to db management and connection check
+def connection_establisher(uri):
+    """
+    Check and establish connection with given MongoDB database
+    :param uri: MongoDB uri
+    :return: connected MongoDB client
+    """
+    try:
+        client = MongoClient(uri, server_api=ServerApi('1'))
+        client.admin.command('ping')
+        return client
+    except Exception as e:
+        main_logger("error", f"Error during connection with MongoDB: {e}")
+        return False
+
+
 def connection_checker(uri):
     """
     Check connection with database
@@ -73,8 +90,10 @@ def data_check(uri, tables):
         result_list.append(random_docs)
     return result_list
 
+# possibly, completed
 
 # Main saving functions:
+# WARNING: replace uri on client to save resources with savings file basic operations!
 def save_vehicles(uri, data):
     """
     Save vehicles information to database
