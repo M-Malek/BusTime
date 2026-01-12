@@ -14,7 +14,9 @@ class ZIPReader:
         self.trips = DataFrame()
         self.stop_times = DataFrame()
         self.shapes = DataFrame()
-        self.data_list = ["stops", "shapes", "trips", "stop_times"] # Basic list with the names of files to import
+        self.agency = DataFrame()
+        self.routes = DataFrame()
+        self.data_list = ["stops", "shapes", "trips", "stop_times"]  # Basic list with the names of files to import
 
     def load_stops(self, data):
         """Load only stops file"""
