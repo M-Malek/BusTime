@@ -21,21 +21,34 @@ class ZIPReader:
     def load_stops(self, data):
         """Load only stops file"""
         self.stops = read_csv(data, encoding="utf-8-sig", sep=',')
-        # self.stops.drop(["stop_code"], axis=1)
+        # self.stops.drop(["stop_code"], axis=1) # Lepiej w read_csv określić, które kolumny importuje!!!
 
     def load_trips(self, data):
         """Load only trips file"""
-        self.trips = read_csv(data, encoding="utf-8-sig", sep=',')
+        self.trips = read_csv(data, encoding="utf-8-sig", sep=',', usecols=["route_id", "service_id", "trip_id",
+                                                                            "direction_id", "shape_id", "brigade"])
         # self.trips.drop(["brigade"], axis=1)
 
     def load_stop_times(self, data):
         """Load only stop_times file"""
-        self.stop_times = read_csv(data, encoding="utf-8-sig", sep=',')
+        self.stop_times = read_csv(data, encoding="utf-8-sig", sep=',', usecols=["trip_id", "arrival_time",
+                                                                                 "departure_time", "stop_id",
+                                                                                 "stop_sequence"])
         # self.stop_times.drop(["pickup_type", "drop_off_type"], axis=1)
 
     def load_shapes(self, data):
         """Load only shapes file"""
         self.shapes = read_csv(data, encoding="utf-8-sig", sep=',')
+
+    def load_agency(self, data):
+        """Load only agency data"""
+        self.agency = read_csv(data, encoding="utf-8-sig", sep=',', usecols=["agency_id", "agency_name", "agency_url"])
+
+    def load_routes(self, data):
+        """Load only routes data"""
+        self.routes = read_csv(data, encoding="utf-8-sig", sep=',', usecols=["route_id", "agency_id", "route_long_name",
+                                                                             "route_type", "route_color",
+                                                                             "route_text_color"])
 
     def data_reader(self, data_list):
         """Read data from given data list"""
@@ -57,6 +70,10 @@ class ZIPReader:
                             self.load_stop_times(read_file.open(entry))
                         case "shapes":
                             self.load_shapes(read_file.open(entry))
+                        case "agency":
+                            self.load_agency(read_file.open(entry))
+                        case "routes":
+                            self.load_routes(read_file.open(entry))
                         case _:
                             break
 
