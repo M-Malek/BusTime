@@ -16,8 +16,8 @@ class ZIPReader:
         self.shapes = DataFrame()
         self.agency = DataFrame()
         self.routes = DataFrame()
-        self.data_list = ["stops", "shapes", "trips", "stop_times",
-                          "shapes", "agency", "routes"]  # Basic list with the names of files to import
+        self.data_list = ["stops.txt", "shapes.txt", "trips.txt", "stop_times.txt",
+                          "shapes.txt", "agency.txt", "routes.txt"]  # Basic list with the names of files to import
 
     def load_stops(self, data):
         """Load only stops file"""
@@ -51,29 +51,26 @@ class ZIPReader:
                                                                              "route_type", "route_color",
                                                                              "route_text_color"])
 
-    def data_reader(self, data_list):
+    def data_reader(self):
         """Read data from given data list"""
         # Check variable data_list - data_list could not be give to method, then match should do default option.
-        if data_list:
-            files = data_list
-        else:
-            files = self.data_list
+        # files = self.data_list
         # Try to open and read necessary files:
         try:
             with ZipFile(self.file) as read_file:
-                for entry in files:
+                for entry in self.data_list:
                     match entry:
-                        case "stops":
+                        case "stops.txt":
                             self.load_stops(read_file.open(entry))
-                        case "trips":
+                        case "trips.txt":
                             self.load_trips(read_file.open(entry))
-                        case "stop_times":
+                        case "stop_times.txt":
                             self.load_stop_times(read_file.open(entry))
-                        case "shapes":
+                        case "shapes.txt":
                             self.load_shapes(read_file.open(entry))
-                        case "agency":
+                        case "agency.txt":
                             self.load_agency(read_file.open(entry))
-                        case "routes":
+                        case "routes.txt":
                             self.load_routes(read_file.open(entry))
                         case _:
                             break
