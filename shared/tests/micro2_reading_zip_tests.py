@@ -49,14 +49,21 @@ def test1():
 
 def test2():
     """Only idea testing purposes"""
-    from services.micro2_timetables.src.zip_parser import Vehicle
+    from services.micro2_timetables.src.zip_parser import Line, Routes, Stop
     import json
 
-    veh = Vehicle(2, "Pan Samochodzik")
-    with open("test_veh.json") as f:
-        json.dump(veh, f)
-        f.close()
+    stop1 = Stop("221_2", "14:52", "14:53", 1)
+    stop2 = Stop("221_2", "14:55", "14:56", 2)
+    routes = Routes("221_2")
+    veh = Line(2, "Pan Samochodzik")
 
+    print(stop1.to_dict())
+    print(stop2.to_dict())
+    print(routes.to_dict())
+
+
+def test3():
+    pass
 
 #test1()
-test2()
+#test2()
