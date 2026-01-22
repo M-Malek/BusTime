@@ -63,7 +63,12 @@ def test2():
 
 
 def test3():
-    pass
+    from services.micro2_timetables.src.zip_parser import zip_parser
+    from shared.tools.env_os_variables import dc_zip_url
+
+    zip_parser(dc_zip_url)
+
 
 #test1()
 #test2()
+test3()

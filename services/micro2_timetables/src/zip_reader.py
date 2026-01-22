@@ -8,7 +8,7 @@ from shared.tools.log_logging import main_logger
 
 
 class ZIPReader:
-    def __init__(self, file):
+    def __init__(self, file, load_on_start: bool = True):
         self.file = file
         self.stops = DataFrame()
         self.trips = DataFrame()
@@ -16,8 +16,13 @@ class ZIPReader:
         self.shapes = DataFrame()
         self.agency = DataFrame()
         self.routes = DataFrame()
+        self.feed_info = DataFrame()
         self.data_list = ["stops.txt", "shapes.txt", "trips.txt", "stop_times.txt",
-                          "shapes.txt", "agency.txt", "routes.txt"]  # Basic list with the names of files to import
+                          "shapes.txt", "agency.txt", "routes.txt",
+                          "feed_info.txt"]  # Basic list with the names of files to import
+        self.load_on_start = load_on_start
+        if self.load_on_start:
+            self.data_reader()
 
     def load_stops(self, data):
         """Load only stops file"""
@@ -51,6 +56,9 @@ class ZIPReader:
                                                                              "route_type", "route_color",
                                                                              "route_text_color"])
 
+    def load_feed_info(self, data):
+        self.feed_info = read_csv(data, encoding="utf-8-sig", sep=',')
+
     def data_reader(self):
         """Read data from given data list"""
         # Check variable data_list - data_list could not be give to method, then match should do default option.
@@ -72,6 +80,8 @@ class ZIPReader:
                             self.load_agency(read_file.open(entry))
                         case "routes.txt":
                             self.load_routes(read_file.open(entry))
+                        case "feed_info.txt":
+                            self.load_feed_info(read_file.open(entry))
                         case _:
                             break
 
