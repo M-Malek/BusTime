@@ -65,8 +65,12 @@ def test2():
 def test3():
     from services.micro2_timetables.src.zip_parser import zip_parser
     from shared.tools.env_os_variables import dc_zip_url
+    import json
 
-    zip_parser(dc_zip_url)
+    data = zip_parser(dc_zip_url)
+    with open("data_tes.json", "w") as file:
+        json.dump(data, file)
+        file.close()
 
 
 #test1()

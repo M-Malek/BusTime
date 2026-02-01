@@ -39,7 +39,8 @@ class ZIPReader:
         """Load only stop_times file"""
         self.stop_times = read_csv(data, encoding="utf-8-sig", sep=',', usecols=["trip_id", "arrival_time",
                                                                                  "departure_time", "stop_id",
-                                                                                 "stop_sequence"])
+                                                                                 "stop_sequence", "pickup_type",
+                                                                                 "drop_off_type"])
         # self.stop_times.drop(["pickup_type", "drop_off_type"], axis=1)
 
     def load_shapes(self, data):
