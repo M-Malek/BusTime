@@ -45,22 +45,6 @@ class Shape:
         }
 
 
-# class Trip:
-#     def __init__(self, route_id, service_id, trip, shape):
-#         self.route_id = route_id
-#         self.service_id = service_id
-#         self.stops = trip
-#         self.shape = shape
-#
-#     def to_dict(self) -> dict:
-#         return{
-#             "route_id": self.route_id,
-#             "service_id": self.service_id,
-#             "stops": self.tripd,
-#             "shape": self.shape
-#         }
-
-
 class Route:
     def __init__(self, route_id, stop_times, shape):
         self.route_id = route_id
@@ -91,28 +75,39 @@ class Line:
         }
 
 
-# def route_finder(data, route_id):
-#     routes = data.trips
-#     trips = routes[routes["route_id"] == route_id]
-#
-#     for _, trip in trips.iterrows():
-#         trip = Trip(trip["trip_id"], trip["service_id"], trip["trip_id"], trip["shape_id"])
-#         print(trip.to_dict())
-
-
-def zip_parser_stops(url_raw_data_set):
-    """
-    Parse zip file and prepare list of stops with their positions
-    :param url_raw_data_set: url to .zip file with GTFS file
-    :return: .json with list of stops: {"stop_code": {"name": str(stop_name), "lat": float(latitude),
-    "lng": float(longitude)}}
-    """
-    raw_zip = zip_downloading(url_raw_data_set)
-    raw_data_set = ZIPReader(raw_zip)
-    return None
-
-
 def zip_parser(url_raw_data_set):
+    """
+    Main .zip parser file - open
+    :param url_raw_data_set:
+    :return:
+    """
+    # Imports:
+    from time import perf_counter
+
+    # Help functions:
+    def build_stop_times(trip_id):
+        if trip_id in stop_time_cache:
+            return stop_time_cache[trip_id]
+
+        time_rows = times_by_trip.get_group(trip_id)
+        stop_times = []
+
+        for t in time_rows.itertuples(index=False):
+            stop_times.append(
+                StopTime(
+                    int(t.stop_id),
+                    str(t.arrival_time),
+                    str(t.departure_time),
+                    int(t.stop_sequence),
+                    int(t.pickup_type),
+                    int(t.drop_off_type),
+                ).to_dict()
+            )
+
+        stop_time_cache[trip_id] = stop_times
+        return stop_times
+
+    # From other scopes
     raw_zip = zip_downloading(url_raw_data_set)
     raw_data_set = ZIPReader(raw_zip)
 
@@ -132,172 +127,75 @@ def zip_parser(url_raw_data_set):
     lines = basic_trip_info["route_id"].unique()
 
     # Find all shapes and all times data
-    all_shapes = raw_data_set.shapes
+    # all_shapes = raw_data_set.shapes
     all_times = raw_data_set.stop_times
 
-    # Dictionary with all necessary data
+    # Group all necessary information:
+    trip_info_by_route = basic_trip_info.groupby("route_id")
+    # shapes_by_id = all_shapes.groupby("shape_id")
+    times_by_trip = all_times.groupby("trip_id")
+    searching_by_route = searching_set.groupby("route_id")
+
+    # Fast access by route_id
+    line_info_by_route = basic_line_info.set_index("route_id")
+
+    # Create cache files
+    shape_cache = {}
+    stop_time_cache = {}
+
+    # Debug - time measurments
+    # t0 = perf_counter()
+
     ready_lines = {}
-    # Debug:
-    # print(basic_line_info[basic_line_info["route_id"] == "405"]["agency_id"].unique()[0])
-    # print(searching_set.head(10))
-    # stop = input("Press Enter to continue")
-    time1 = datetime.datetime.now()
-    for line in lines:  # Lines - set of vehicle lines numbers: PKS, T7, 1, 2, 3...
-        print(f"Opracowuje linię: {line}")
-        # Find all unique shapes for given route
-        all_unique_shapes = basic_trip_info[basic_trip_info["route_id"] == line]["shape_id"].unique()
 
-        # Find all unique trips for given route:
-        all_unique_trips = basic_trip_info[basic_trip_info["route_id"] == line]["trip_id"].unique()
+    for line in lines:
+        # --- Jedno pobranie danych dla linii (krok 1,5) ---
+        route_trip_info = trip_info_by_route.get_group(line)
+        route_searching = searching_by_route.get_group(line)
+        line_info = line_info_by_route.loc[line]
 
-        # For all shapes create set of Shape objects describing route shape
-        # Debug:
-        # time1 = datetime.datetime.now()
-        ready_shapes = {}
-        for shape in all_unique_shapes:  # all_unique_shapes - all shape numbers
-            shape_list = []
-            for s_entry in all_shapes[all_shapes["shape_id"] == shape].iterrows():
-                #print(s_entry)
-                shape_seq = int(s_entry[1].iloc[3])  # int(s_entry[1][3])
-                shape_lat = float(s_entry[1].iloc[1])  # float(s_entry[1][1])
-                shape_lng = float(s_entry[1].iloc[2])  # float(s_entry[1][2])
-                # Create Shape object from founded data
-                ready_shape = Shape(shape_seq, shape_lat, shape_lng).to_dict()
-                shape_list.append(ready_shape)
-            ready_shapes[int(shape)] = shape_list
+        # --- Unique shape_id and trip_id ---
+        # unique_shapes = route_trip_info["shape_id"].unique()
+        unique_trips = route_trip_info["trip_id"].unique()
 
-        # FInd all stops of vehicle - stop_id, times and sequence position
-        ready_times = {}
-        for trip in all_unique_trips:  # all_unique_trips - all trip_id numbers
-            # print(trip)
-            stop_time_list = []
-            for t_entry in all_times[all_times["trip_id"] == trip].iterrows():
-                time_seq = int(t_entry[1].iloc[4])  # int(t_entry[1][4])
-                time_stop = int(t_entry[1].iloc[3])  # int(t_entry[1][3])
-                time_arr_time = str(t_entry[1].iloc[1])  # str(t_entry[1][1])
-                time_dep_time = str(t_entry[1].iloc[2])  # str(t_entry[1][2])
-                time_pickup = int(t_entry[1].iloc[5])  # int(t_entry[1][5])
-                time_dropoff = int(t_entry[1].iloc[6])  # int(t_entry[1][6])
-                ready_time = StopTime(time_stop, time_arr_time, time_dep_time, time_seq, time_pickup, time_dropoff).\
-                    to_dict()
-                stop_time_list.append(ready_time)
-            ready_times[str(trip)] = stop_time_list
+        # --- Building shapes  ---
+        # shapes_by_shape_id = {
+        #     int(shape_id): build_shape(int(shape_id))
+        #     for shape_id in unique_shapes
+        # }
 
-        # Each vehicle has his own set of pairs trip - shape: shape describe how physically vehicle drive between
-        # stops, trip describes which stops vehicle has and times of reaching and leaving this points.
-        # Putting together shape and time data for vehicle:
-        """
-        {
-            numer, - numer linii
-            color, - color linii
-            przewoźnik, - co to za przewoźnik
-            trasy: 
-            {
-                trip_id, - numer tripa
-                service_day, - w jakie dni jeździ
-                shape, - kształt tego tripa
-                stop_times, - przystanki w tym tripie
-            }
-                
+        # --- Building stop_times(krok 2,3) ---
+        stop_times_by_trip = {
+            str(trip_id): build_stop_times(str(trip_id))
+            for trip_id in unique_trips
         }
 
-        """
-        # Preparing pairs: route - shape:
-        filtered_searching_set = searching_set[
-            searching_set["route_id"] == line
-            ]
+        # --- Route assembling ---
+        routes = {}
 
-        ready_data_set = {}
-        for _, row in filtered_searching_set.iterrows():
-            trip_id = row["trip_id"]
-            shape_id = row["shape_id"]
+        for row in route_searching.itertuples(index=False):
+            trip_id = str(row.trip_id)
+            shape_id = int(row.shape_id)
 
-            ready_data_set[trip_id] = {
+            routes[trip_id] = {
                 "trip_id": trip_id,
                 "shape_id": shape_id,
-                "trip_data": ready_times[trip_id],
-                "shape_data": ready_shapes[int(shape_id)]
+                "trip_data": stop_times_by_trip[trip_id],
+                # "shape_data": shapes_by_shape_id[shape_id],
             }
 
-        # ready_data_set = {}
-        # for data_set in searching_set.iterrows():
-        #     ready_data_set[data_set[1].iloc[1]] = {
-        #         "trip_id": data_set[1].iloc[1],
-        #         "shape_id": data_set[1].iloc[2],
-        #         "trip_data": ready_times[data_set[1].iloc[1]],  # to ma być z ready_times
-        #         "shape_data": ready_shapes[data_set[1].iloc[2]]  # to ma być z ready_shapes
-        #     }
-            # print(ready_data_set)
-            # stop = input("Press enter")
+        # --- Typ pojazdu (krok 5) ---
+        vehicle_type = "tram" if int(line_info.route_type) == 0 else "bus"
 
-        # Preparing information about vehicle type: bus or tram:
-        if int(basic_line_info[basic_line_info["route_id"] == line]["route_type"].unique()[0]) == 0:
-            vehicle_type = "tram"
-        else:
-            vehicle_type = "bus"
-
-        # Main comparison for examined line
+        # --- Finalny zapis linii ---
         ready_lines[line] = {
             "line_number": str(line),
-            "type": str(vehicle_type),
-            "agency": int(basic_line_info[basic_line_info["route_id"] == line]["agency_id"].unique()[0]),
-            "line_color": str(basic_line_info[basic_line_info["route_id"] == line]["route_color"].unique()[0]),
-            "routes": ready_data_set,
+            "type": vehicle_type,
+            "agency": int(line_info.agency_id),
+            "line_color": str(line_info.route_color),
+            "routes": routes,
         }
-    time2 = datetime.datetime.now()
-    print(f"Czas dla opracowania danych pojazdów: {time2-time1} ")
+
+    # print(f"Czas opracowania danych pojazdów: {perf_counter() - t0:.2f}s")
     return ready_lines
 
-"""
-Dla każdej linii trzeba rozpisać dokładnie dane które potrzeba zapisać:
-numer linii:
-    id_przewoźnika: <value>,
-    id_trasy:
-        przebieg trasy:
-            numer w sekwencji: nazwa_przystanku (id przystanku?), czas_przyjazdu, czas_odjazdu
-Każda linia jako osobny .json?
-Linia:
-    numer,
-    color,
-    przewoźnik,
-    trasy (trip_id): -> każda trasa ma swoje id, dzień kiedy kursuje, przebieg trasy po przystankach i shape id
-    czyli przebieg trasy po mapie (do każdego z przystanków można dojechać na różne sposoby, stąd to shape!)
-        id danej trasy (trip_id)
-        service_id (dzień kursowania)
-        shape_id
-        kształt (szukany dla danego shape_id): -> potrzebny do wyświetlenia trasy pojazdu na mapie
-            numer w kolejności,
-            lat,
-            lng,
-        przebieg trasy (szukany dla danego trip_id): -> potrzebny do statystyk
-            numer w kolejności (sequence),
-            arrival_time,
-            departure_time,
-            stop_id,
-
-Skąd jakie dane:
-numer - routes.txt
-color - routes.txt
-przewoźnik - routes.txt
----numer, color i przewoźnik mam w basic_line_info---
-trasy:
-    trip_id - trips.txt
-    service_id - trip.txt
-    shape_id - trip.txt
-    kształt trasy - shapes.txt szukamy po shape_id:
-            sekwencja - shape.txt
-            lat - shape.txt
-            lng - shape.txt
-    przebieg trasy - stop_time.txt szukamy po trip_id:
-        sekwencja - stop_time.txt
-        przystanek - stop_time.txt
-        godzina przyjazdu (arrival time) - stop_time.txt
-        godzina odjazdu (departure time) - stop_time.txt
-
-Osobno do wczytania pozycje przystanków (do wyświetlenia na mapie, jeden wspólny plik):
-stop_id
-nazwa - stops.txt
-lat - stops.txt
-lng - stops.txt
-strefa - stops.txt
-"""

@@ -68,7 +68,7 @@ def test3():
     import json
 
     data = zip_parser(dc_zip_url)
-    with open("data_tes.json", "w") as file:
+    with open("data_test.json", "w") as file:
         json.dump(data, file)
         file.close()
 
