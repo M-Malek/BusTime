@@ -73,6 +73,29 @@ def test3():
         file.close()
 
 
+def test4():
+    """Testing zip_stop_parser!"""
+    from services.micro2_timetables.src.zip_stops_parser import zip_parser_stops
+    from shared.tools.env_os_variables import dc_zip_url
+
+    raw_zip = zip_downloading(dc_zip_url)
+    raw_data_set = ZIPReader(raw_zip)
+    stops = zip_parser_stops(raw_data_set)
+    print(stops)
+
+
+def test5():
+    """Testing shapes_parser!"""
+    from services.micro2_timetables.src.zip_shapes_reader import shape_parser
+    from shared.tools.env_os_variables import dc_zip_url
+
+    raw_zip = zip_downloading(dc_zip_url)
+    raw_data_set = ZIPReader(raw_zip)
+    ready_shapes = shape_parser(raw_data_set)
+    print(ready_shapes)
+
+
 #test1()
 #test2()
-test3()
+#test3()
+test4()

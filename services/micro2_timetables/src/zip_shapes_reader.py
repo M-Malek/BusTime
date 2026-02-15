@@ -1,3 +1,9 @@
+"""
+Read shapes.txt and creat set of shapes data
+@M-Malek
+"""
+
+
 class ReadyShape:
     def __init__(self, shape_id, shapes):
         self.shape_id = shape_id
@@ -26,7 +32,6 @@ class Shape:
 
 def shape_parser(zip_data):
     """
-    UNTESTED!
     Return all unique shapes based on Shapes class
     :param zip_data: downloaded .zip file as ZIPReader object
     :return: dict with all shapes
