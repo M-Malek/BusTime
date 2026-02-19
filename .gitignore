@@ -5,3 +5,8 @@ trip_updates(6).pb
 /.idea
 /services/micro1_vehicles/log.txt
 /services/micro1_vehicles/log_file.log
+/docker-compose.yaml
+/.env
+/services/micro1_vehicles/env
+/services/micro1_vehicles/config.env
+/services/micro1_vehicles/log_file.log

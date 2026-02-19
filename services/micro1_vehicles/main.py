@@ -5,9 +5,15 @@ Respond for collecting and saving in DB current vehicle position in given time p
 """
 # Libs:
 from time import sleep
-from services.micro1_vehicles.src.collector_runner import vehicles
-from services.micro1_vehicles.src.data_sender import connection_establisher
-from shared.tools.env_os_variables import db_uri
+# from services.micro1_vehicles.src.collector_runner import vehicles
+from src.collector_runner import vehicles
+# from services.micro1_vehicles.src.data_sender import connection_establisher
+from src.data_sender import connection_establisher
+# from shared.tools.env_os_variables import db_uri
+import os
+from dotenv import load_dotenv
+
+load_dotenv("config.env")
 
 
 # This code has to bee adopted for AWS service. While True loop has to be replaced.
@@ -19,7 +25,8 @@ def main():
         vehicles()
         client.close()
         sleep(30)"""
-    client = connection_establisher(db_uri)
+    # client = connection_establisher(db_uri)
+    client = connection_establisher(os.getenv("MONGO_URI"))
     vehicles(client)
     client.close()
     sleep(30)

@@ -3,6 +3,7 @@ Log file - function to log program workflow in command line and separate files
 @M-Malek
 """
 import logging
+import os
 
 # Class: custom logging message colors:
 RESET = "\033[0m"
@@ -37,7 +38,11 @@ def main_logger(message_type, message_body):
         )
 
         # Handler do pliku
-        file_handler = logging.FileHandler("log_file.log")
+        if "LOG_FILE" in os.environ:
+            log_file = os.getenv("LOG_FILE")
+        else:
+            log_file = "log_file.log"
+        file_handler = logging.FileHandler(log_file)
         file_handler.setFormatter(formatter)
 
         # Handler do konsoli

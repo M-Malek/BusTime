@@ -9,8 +9,9 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo.errors import ConnectionFailure
 
-from shared.tools.log_logging import main_logger
-from shared.tools.env_os_variables import db_uri
+from src.log_logging import main_logger
+# from shared.tools.env_os_variables import db_uri
+from os import getenv
 
 
 # Small companion function to db management and connection check
@@ -118,7 +119,7 @@ def save_vehicles(client, data):
     except ConnectionFailure as db_con_error:
         main_logger("error", f"Connection with MongoDB has been broken!: Error: {db_con_error}\n Reconnecting!")
         try:
-            client = connection_establisher(db_uri)
+            client = connection_establisher(getenv("MONGO_URI"))
         except ConnectionFailure as db_con_error_again:
             main_logger("error", f"Reconnection failed! Saving data to MongoDB failed!")
             return None

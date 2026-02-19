@@ -9,8 +9,8 @@ Manage downloaded feeds file
 from pandas import DataFrame
 import datetime
 
-from data_collector_poznan.src.gather.feeds_gater import download_vehicle_data
-from shared.tools.log_logging import main_logger
+from src.download_vehicle_data import download_vehicle_data
+from src.log_logging import main_logger
 
 
 def feeds_manager(url_vehicle, url_feeds):

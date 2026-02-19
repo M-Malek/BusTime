@@ -2,10 +2,9 @@
 Download feed files for next processing
 Creator: M-Malek
 """
-from google.protobuf.message import DecodeError
-import shared.tools.filestoolbox as FilesToolBox
-from google.transit import gtfs_realtime_pb2
-from src.log_logging import main_logger
+import google
+
+# GLOBALS:
 
 
 def download_vehicle_data(url):
@@ -14,13 +13,14 @@ def download_vehicle_data(url):
     :param url: url for data
     :return: data: GFTS raw data in ... format or None if data download failed
     """
-    # import shared.tools.filestoolbox as FilesToolBox
-    # from google.transit import gtfs_realtime_pb2
-    # from google.protobuf.json_format import MessageToDict
+    #import shared.tools.filestoolbox as FilesToolBox
+    from src.file_collector import file_collector
+    from google.transit import gtfs_realtime_pb2
+    from google.protobuf.json_format import MessageToDict
 
     # 1. Download feeds.pb
-    raw_data = FilesToolBox.FilesToolBox.file_collector(url)
-
+    # raw_data = FilesToolBox.FilesToolBox.file_collector(url)
+    raw_data = file_collector(url)
     # 2. Encode feeds.pb
     try:
         data = gtfs_realtime_pb2.FeedMessage()
@@ -28,11 +28,7 @@ def download_vehicle_data(url):
         # Debug:
         # print(type(data))
         # data expression type: gtfs_realtime_pb2.FeedMessage
-    except DecodeError:
-        main_logger("error", "Decoding error after downloading protbuf file from ZTM services!")
+    except google.protobuf.message.DecodeError:
         return None
 
     return data
-
-
-
