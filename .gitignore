@@ -10,3 +10,6 @@ trip_updates(6).pb
 /services/micro1_vehicles/env
 /services/micro1_vehicles/config.env
 /services/micro1_vehicles/log_file.log
+/services/micro2_timetables/env
+/services/micro2_timetables/config.env
+/services/micro2_timetables/log_file.log

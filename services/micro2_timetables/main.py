@@ -15,6 +15,11 @@ from pymongo.errors import ConnectionFailure
 import os
 
 
+# For debug - moving micro2 to own env
+import os
+from dotenv import load_dotenv
+
+load_dotenv("config.env")
 
 
 def job_stops():
