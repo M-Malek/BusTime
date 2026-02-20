@@ -2,82 +2,45 @@
 Main.py file for Microservice 2 - parsing data tables from ZTM server
 @M-Malek
 """
-from src.zip_gather import zip_downloading
-from src.zip_reader import ZIPReader
-from src.zip_parser import zip_parser
-from src.zip_stops_parser import zip_parser_stops
-from src.zip_shapes_reader import shape_parser
-from boto3 import client
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-from shared.tools.log_logging import main_logger
-from pymongo.errors import ConnectionFailure
-import os
-
 
 # For debug - moving micro2 to own env
 import os
 from dotenv import load_dotenv
 
+#Libs:
+import json
+from src.log_logging import main_logger
+from src.micro_jobs import job_stops, job_normal, job_shapes
+
 load_dotenv("config.env")
 
 
-def job_stops():
-    """Load and save in MongoDB all stops data"""
-    source = zip_downloading(os.getenv("DC_ZIP_URL"))
-    data = ZIPReader(source)
-    stops_data = zip_parser_stops(data)
-
-    try:
-        client = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
-        client.admin.command('ping')
-        return client
-    except ConnectionFailure as e:
-        main_logger("error", f"Connection with MongoDB cannot be established: {e}")
-    except Exception as e:
-        main_logger("error", f"Error during connection with MongoDB: {e}")
-        return None
-
-
-
-def job_shapes():
-    """Load and save to S3 all shapes data"""
-    pass
-
-
-def job_normal():
-    """Load and save to S3 all stoptimes data"""
-    pass
-
-
 def main(action_type="normal"):
-    s3 = client(
-        "s3",
-        endpoint_url=os.getenv("S3_ENDPOINT"),
-        aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
-        aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
-    )
+    jobs = os.getenv("MICRO2_JOBS")
+    current_job = os.getenv("MICRO2_CURRENT_JOB")
 
-    bucket_name = os.getenv("S3_BUCKET")
+    if jobs or current_job is None:
+        main_logger("error", "Empty jobs list or job selector in env variables for Micro2")
+        return None
+    else:
+        try:
+            program_jobs = json.load(jobs)
 
-    # utworzenie bucket (jeśli nie istnieje)
-    try:
-        s3.create_bucket(Bucket=bucket_name)
-    except:
-        pass
-
-    # Dopisać funkcję od zapisywania każdej linii do osobnego pliku!
-    source = zip_downloading(os.getenv("DC_ZIP_URL"))
-    raw_data = ZIPReader(source)
-
-    if action_type == "shapes":
-        data = shape_parser(raw_data)
-        # Save shapes to S3
-    elif action_type == "stops":
-        stops = zip_parser_stops(raw_data)
-        # Save stops to S3
-    elif action_type == "normal":
-        data = zip_parser(os.getenv("DC_ZIP_URL"))
+            if current_job in program_jobs:
+                if current_job == "normal":
+                    job_normal()
+                elif current_job == "shapes":
+                    job_shapes()
+                elif current_job == "stops":
+                    job_stops()
+                else:
+                    main_logger("warning", "Debug: This line shouldn't been executed:"
+                                           " job hasn't been selected so I run normal job")
+                    job_normal()
+            else:
+                main_logger("error", "Given job name doesn't exist in Mirco2 jobs list!")
+        except Exception as e:
+            main_logger("error", f"Suprising error during executing Micro2 main.py: {e}")
 
 
 if __name__ == "__main__":

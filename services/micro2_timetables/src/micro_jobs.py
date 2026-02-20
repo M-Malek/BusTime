@@ -1,0 +1,96 @@
+from src.zip_parser import zip_parser
+from src.zip_stops_parser import zip_parser_stops
+from src.zip_shapes_reader import shape_parser
+from boto3 import client
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+from src.log_logging import main_logger
+from pymongo.errors import ConnectionFailure
+import os
+import json
+
+
+def db_connector():
+    # Function multiplied - to be moved to own lib
+    counter = 0
+    while counter <= 3:
+        try:
+            client = MongoClient(os.getenv("MONGO_URI"), server_api=ServerApi('1'))
+            client.admin.command('ping')
+            return client
+        except ConnectionFailure as e:
+            main_logger("error", f"Connection with MongoDB cannot be established: {e}. "
+                                 f"\n Reconnecting: attempt {counter}")
+        except Exception as e:
+            main_logger("error", f"Error during connection with MongoDB: {e}. \n Reconnecting: attempt {counter}")
+        counter -= 1
+
+
+def job_stops():
+    """Load and save in MongoDB all stops data"""
+    source = zip_downloading(os.getenv("DC_ZIP_URL"))
+    data = ZIPReader(source)
+    stops_data = zip_parser_stops(data)
+
+    client = db_connector()
+    db_set = client["Poznan"]
+    collection = db_set["Stops"]
+    collection.insert_many(stops_data.to_dict("records"))
+    main_logger("info", "Downloaded stops saved in MongoDB")
+
+
+def job_shapes():
+    """Load and save to S3 all shapes data"""
+    s3 = client(
+        "s3",
+        endpoint_url=os.getenv("S3_ENDPOINT"),
+        aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
+        aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+    )
+
+    bucket_name = os.getenv("S3_BUCKET")
+    bucket_prefix = "shapes"
+
+    # utworzenie bucket (jeśli nie istnieje)
+    try:
+        s3.create_bucket(Bucket=bucket_name)
+    except Exception as e:
+        main_logger("error", "micro_jobs.py: S3 bucket has been created earlier")
+
+    shapes_data = shape_parser()  # stoped here!
+
+
+def job_normal():
+    """Load and save to S3 all stoptimes data"""
+    s3 = client(
+        "s3",
+        endpoint_url=os.getenv("S3_ENDPOINT"),
+        aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
+        aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+    )
+
+    bucket_name = os.getenv("S3_BUCKET")
+    bucket_prefix = "lines"
+
+    # utworzenie bucket (jeśli nie istnieje)
+    try:
+        s3.create_bucket(Bucket=bucket_name)
+    except Exception as e:
+        main_logger("error", "micro_jobs.py: S3 bucket has been created earlier")
+
+    # Dopisać funkcję od zapisywania każdej linii do osobnego pliku!
+    stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+    for line, data in stoptimes_data.items():
+        file_key = f"{bucket_prefix}{line}.json"
+        try:
+            s3.put_object(
+                Bucket=os.getenv("S3_BUCKET"),
+                Key=file_key,
+                Body=json.dumps(data, ensure_ascii=False).encode("utf-8"),
+                ContentType="application/json"
+            )
+        except Exception as e:
+            main_logger("warning", f"Micro2 job_normal: failed to save line: {line}, error: {e}")
+
+    main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
+

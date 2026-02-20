@@ -4,6 +4,8 @@ Save data prepared by microservice 2 in DynamoDB
 """
 # import boto3
 import json
+import os
+
 from shared.tools.log_logging import main_logger
 from shared.tools.env_os_variables import aws_zip_bucket_name, aws_zip_object_key
 
@@ -16,9 +18,15 @@ def save_zip_data(client, data):
     :return: saving data in bucket or error
     """
     try:
-        client.put_object(
+        """client.put_object(
             Bucket=aws_zip_bucket_name,
             Key=aws_zip_object_key,
+            Body=json.dumps(data, ensure_ascii=False),
+            ContentType="application/json"
+        )"""
+        client.put_object(
+            Bucket=os.getenv("S3_BUCKET"),
+            Key=os.getenv("S3_ACCESS_KEY"),
             Body=json.dumps(data, ensure_ascii=False),
             ContentType="application/json"
         )
