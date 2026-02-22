@@ -13,3 +13,6 @@ trip_updates(6).pb
 /services/micro2_timetables/env
 /services/micro2_timetables/config.env
 /services/micro2_timetables/log_file.log
+/services/micro3_statistic/env
+/services/micro3_statistic/config.env
+/services/micro3_statistic/log_file.log

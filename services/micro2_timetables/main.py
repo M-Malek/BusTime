@@ -15,16 +15,27 @@ from src.micro_jobs import job_stops, job_normal, job_shapes
 load_dotenv("config.env")
 
 
-def main(action_type="normal"):
+def main():
     jobs = os.getenv("MICRO2_JOBS")
     current_job = os.getenv("MICRO2_CURRENT_JOB")
 
-    if jobs or current_job is None:
+    # print(jobs)
+    program_jobs = jobs.replace(" ", "").split(',')
+    # print(new_jobs)
+    # print(type(new_jobs))
+    # print(current_job)
+    # print(type(current_job))
+    # for j in new_jobs:
+    #     if str(current_job) == j:
+    #         print("Jest to zadanie!")
+
+    if len(jobs) == 0 or current_job == "":
+        print("???")
         main_logger("error", "Empty jobs list or job selector in env variables for Micro2")
         return None
     else:
         try:
-            program_jobs = json.load(jobs)
+            # program_jobs = list(json.load(jobs))
 
             if current_job in program_jobs:
                 if current_job == "normal":
@@ -35,9 +46,10 @@ def main(action_type="normal"):
                     job_stops()
                 else:
                     main_logger("warning", "Debug: This line shouldn't been executed:"
-                                           " job hasn't been selected so I run normal job")
+                                           " job hasn't been selected or typed incorrectly so I run normal job")
                     job_normal()
             else:
+                print("Test")
                 main_logger("error", "Given job name doesn't exist in Mirco2 jobs list!")
         except Exception as e:
             main_logger("error", f"Suprising error during executing Micro2 main.py: {e}")

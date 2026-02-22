@@ -58,6 +58,16 @@ def job_shapes():
         main_logger("error", "micro_jobs.py: S3 bucket has been created earlier")
 
     shapes_data = shape_parser()  # stoped here!
+    file_key = f"{bucket_prefix}-shapes.json"
+    try:
+        s3.put_object(
+            Bucket=os.getenv("S3_BUCKET"),
+            Key=file_key,
+            Body=json.dumps(shapes_data, ensure_ascii=False).encode("utf-8"),
+            ContentType="application/json"
+        )
+    except Exception as e:
+        main_logger("warning", f"Micro2 job_shapes: falied to save shapes, error: {e}")
 
 
 def job_normal():
@@ -70,7 +80,7 @@ def job_normal():
     )
 
     bucket_name = os.getenv("S3_BUCKET")
-    bucket_prefix = "lines"
+    bucket_prefix = "line-"
 
     # utworzenie bucket (jeśli nie istnieje)
     try:
@@ -80,6 +90,13 @@ def job_normal():
 
     # Dopisać funkcję od zapisywania każdej linii do osobnego pliku!
     stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+
+    # Lines only for debug: test when S3 bucket hasn't been available:
+    import json
+    with open("json_stops.json", "w") as file:
+        json.dump(stoptimes_data, file)
+        file.close()
+
     for line, data in stoptimes_data.items():
         file_key = f"{bucket_prefix}{line}.json"
         try:
@@ -93,4 +110,3 @@ def job_normal():
             main_logger("warning", f"Micro2 job_normal: failed to save line: {line}, error: {e}")
 
     main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
-
