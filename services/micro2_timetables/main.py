@@ -6,6 +6,7 @@ Main.py file for Microservice 2 - parsing data tables from ZTM server
 # For debug - moving micro2 to own env
 import os
 from dotenv import load_dotenv
+from src.sqs_messages import consume
 
 #Libs:
 import json
@@ -30,7 +31,7 @@ def main():
     #         print("Jest to zadanie!")
 
     if len(jobs) == 0 or current_job == "":
-        print("???")
+        # print("???")
         main_logger("error", "Empty jobs list or job selector in env variables for Micro2")
         return None
     else:
@@ -57,3 +58,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # consume()
