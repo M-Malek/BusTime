@@ -16,3 +16,6 @@ trip_updates(6).pb
 /services/micro3_statistic/env
 /services/micro3_statistic/config.env
 /services/micro3_statistic/log_file.log
+/services/micro4_watcher/env
+/services/micro4_watcher/config.env
+/services/micro4_watcher/log_file.log
