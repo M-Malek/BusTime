@@ -15,14 +15,14 @@ sqs = boto3.client(
 
 
 QUEUE_URL = os.getenv("QUEUE_URL")
-MESSAGES_SET = (
-    ("GTFS_UPDATED", ["feeds.pb", "vehicles.pb"]),
-    ("GTFS_WIPEOUT", ["MONGO_DB"]),
-    ("STOP_TIMES_NORMAL", ["stop_times.txt", "agency.txt", "routes.txt", "trips.txt"]),
-    ("STOP_TIMES_SHAPES", ["shapes.txt"]),
-    ("STOP_TIMES_STOPS", ["stops.txt"]),
-    ("STATISTIC_NORMAL", ["MONGO_DB"])
-)
+MESSAGES_SET = {
+    "vehicle_update": ("GTFS_UPDATED", ["feeds.pb", "vehicles.pb"]),
+    "vehicle_wipeout": ("GTFS_WIPEOUT", ["MONGO_DB"]),
+    "stoptimes_normal": ("STOP_TIMES_NORMAL", ["stop_times.txt", "agency.txt", "routes.txt", "trips.txt"]),
+    "stoptimes_shapes": ("STOP_TIMES_SHAPES", ["shapes.txt"]),
+    "stoptimes_stops": ("STOP_TIMES_STOPS", ["stops.txt"]),
+    "statistic_normal": ("STATISTIC_NORMAL", ["MONGO_DB"])
+}
 
 
 def message_creator(event_type: str, changed_files: list):

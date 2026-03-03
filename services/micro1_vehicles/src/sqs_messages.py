@@ -51,8 +51,7 @@ def consume():
                 ReceiptHandle=message["ReceiptHandle"]
             )
 
-            print("Message deleted (job done).")
-
+            # print("Message deleted (job done).")
         except Exception as e:
             print("Error:", e)
             # jobs went back to queue

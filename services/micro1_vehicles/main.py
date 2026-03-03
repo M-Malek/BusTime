@@ -4,6 +4,8 @@ Respond for collecting and saving in DB current vehicle position in given time p
 @M-Malek
 """
 # Libs:
+import time
+
 from dotenv import load_dotenv
 from src.micro_jobs import job_data_download, job_database_wipeout
 from src.log_logging import main_logger
@@ -14,6 +16,7 @@ load_dotenv("config.env")
 
 
 # This code has to bee adopted for AWS service. While True loop has to be replaced.
+"""
 def main():
     jobs = os.getenv("MICRO1_JOBS")
     current_job = os.getenv("MICRO1_CURRENT_JOB")
@@ -50,6 +53,18 @@ def main():
                 main_logger("error", "Given job name doesn't exist in Mirco1 jobs list!")
         except Exception as e:
             main_logger("error", f"Suprising error during executing Micro1 main.py: {e}")
+"""
+
+
+def main(action=True):
+    """
+    Main Microservice 1 action loop
+    :return: default Microservice 1 workflow
+    """
+    while action:
+        job_data_download()
+        # consume()  # consume turned off - do not use micro1 to wipeout data from database!
+        time.sleep(30)
 
 
 if __name__ == "__main__":
