@@ -1,0 +1,6 @@
+env/
+__pycache__/
+*.pyc
+*.log
+README.md
+json_stops.json

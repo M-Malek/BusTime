@@ -31,7 +31,7 @@ def vehicles(client):
     except Exception as e:
         # db_logger(env_var.db_uri, log_type="error", log_mess=f"saving data to DataBase: {e}")
         main_logger("crit", f"Saving vehicles position in Vehicles table in db failed: {e}")
-        print(e)
+        # print(e)
 
 
 def wipeout():

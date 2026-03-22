@@ -1,6 +1,7 @@
 from src.zip_parser import zip_parser
 from src.zip_stops_parser import zip_parser_stops
 from src.zip_shapes_reader import shape_parser
+from src.zip_saver import s3_checker, save_data
 from boto3 import client
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -8,6 +9,7 @@ from src.log_logging import main_logger
 from pymongo.errors import ConnectionFailure
 import os
 import json
+from src.ztm_site_checker import checksum_checker
 
 
 def db_connector():
@@ -72,41 +74,42 @@ def job_shapes():
 
 def job_normal():
     """Load and save to S3 all stoptimes data"""
-    s3 = client(
-        "s3",
-        endpoint_url=os.getenv("S3_ENDPOINT"),
-        aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
-        aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
-    )
+    # Check if its necessary to download new data:
+    if checksum_checker():
+        s3 = client(
+            "s3",
+            endpoint_url=os.getenv("S3_ENDPOINT"),
+            aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
+            aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+        )
 
-    bucket_name = os.getenv("S3_BUCKET")
-    bucket_prefix = "line-"
+        bucket_name = os.getenv("S3_BUCKET")
+        # bucket_prefix = "line-"
+        bucket_prefix = os.getenv("S3-BUCKET_PREFIX")
 
-    # utworzenie bucket (jeśli nie istnieje)
-    try:
-        s3.create_bucket(Bucket=bucket_name)
-    except Exception as e:
-        main_logger("error", "micro_jobs.py: S3 bucket has been created earlier")
-
-    # Dopisać funkcję od zapisywania każdej linii do osobnego pliku!
-    stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
-
-    # Lines only for debug: test when S3 bucket hasn't been available:
-    import json
-    with open("json_stops.json", "w") as file:
-        json.dump(stoptimes_data, file)
-        file.close()
-
-    for line, data in stoptimes_data.items():
-        file_key = f"{bucket_prefix}{line}.json"
-        try:
-            s3.put_object(
-                Bucket=os.getenv("S3_BUCKET"),
-                Key=file_key,
-                Body=json.dumps(data, ensure_ascii=False).encode("utf-8"),
-                ContentType="application/json"
-            )
-        except Exception as e:
-            main_logger("warning", f"Micro2 job_normal: failed to save line: {line}, error: {e}")
-
-    main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
+        if not s3_checker(s3):
+            stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+            save_data(s3, stoptimes_data)
+            main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
+        else:
+            main_logger("info", "Stop times data already stored in S3. New data hasn't been downloaded.")
+    #
+    # # Lines only for debug: test when S3 bucket hasn't been available:
+    # import json
+    # with open("json_stops.json", "w") as file:
+    #     json.dump(stoptimes_data, file)
+    #     file.close()
+    #
+    # for line, data in stoptimes_data.items():
+    #     file_key = f"{bucket_prefix}{line}.json"
+    #     try:
+    #         s3.put_object(
+    #             Bucket=os.getenv("S3_BUCKET"),
+    #             Key=file_key,
+    #             Body=json.dumps(data, ensure_ascii=False).encode("utf-8"),
+    #             ContentType="application/json"
+    #         )
+    #     except Exception as e:
+    #         main_logger("warning", f"Micro2 job_normal: failed to save line: {line}, error: {e}")
+    #
+    # main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")

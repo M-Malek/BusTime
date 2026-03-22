@@ -3,6 +3,7 @@ Download feed files for next processing
 Creator: M-Malek
 """
 import google
+from src.log_logging import main_logger
 
 # GLOBALS:
 
@@ -30,5 +31,8 @@ def download_vehicle_data(url):
         # data expression type: gtfs_realtime_pb2.FeedMessage
     except google.protobuf.message.DecodeError:
         return None
+    except Exception as e:
+        main_logger("error", f"Error to download file: f{url}, \n Error: {e}")
+        download_vehicle_data(url)
 
     return data

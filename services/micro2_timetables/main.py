@@ -50,7 +50,6 @@ def main():
                                            " job hasn't been selected or typed incorrectly so I run normal job")
                     job_normal()
             else:
-                print("Test")
                 main_logger("error", "Given job name doesn't exist in Mirco2 jobs list!")
         except Exception as e:
             main_logger("error", f"Suprising error during executing Micro2 main.py: {e}")

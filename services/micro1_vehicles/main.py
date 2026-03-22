@@ -63,8 +63,9 @@ def main(action=True):
     """
     while action:
         job_data_download()
+        # print("Test")
         # consume()  # consume turned off - do not use micro1 to wipeout data from database!
-        time.sleep(30)  # change to 15 seconds! why? one data runtime take 15 seconds
+        time.sleep(15)  # change to 15 seconds! why? one data runtime take 15 seconds
 
 
 if __name__ == "__main__":

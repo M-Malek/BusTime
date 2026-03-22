@@ -21,16 +21,21 @@ def connection_establisher(uri):
     :param uri: MongoDB uri
     :return: connected MongoDB client
     """
-    try:
-        client = MongoClient(uri, server_api=ServerApi('1'))
-        client.admin.command('ping')
-        return client
-    except ConnectionFailure as e:
-        main_logger("error", f"Connection with MongoDB cannot be established: {e}")
-        return None
-    except Exception as e:
-        main_logger("error", f"Error during connection with MongoDB: {e}")
-        return None
+    counter = 5
+    while counter >= 0:
+        try:
+            client = MongoClient(uri, server_api=ServerApi('1'))
+            client.admin.command('ping')
+            return client
+        except ConnectionFailure as e:
+            main_logger("error", f"Connection with MongoDB cannot be established: {e}")
+            return None
+        except Exception as e:
+            main_logger("error", f"Error during connection with MongoDB: {e}")
+            return None
+        counter -= 1
+    main_logger("info", "After 5 attempts, connecting to database failed")
+    return None
 
 
 # def connection_checker(uri):

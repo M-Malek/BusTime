@@ -1,0 +1,22 @@
+Microservice 1 bugs:
+2026-03-16 17:49:00,407: ERROR: Connection with MongoDB cannot be established:
+mpkstats-shard-00-00.dxm5i.mongodb.net:27017:
+timed out (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 30s,
+Topology Description: <TopologyDescription id: 69b8426eee5beac5ea4303d5, topology_type: ReplicaSetNoPrimary,
+servers: [<ServerDescription ('mpkstats-shard-00-00.dxm5i.mongodb.net', 27017) server_type: Unknown, rtt: None,
+error=NetworkTimeout('mpkstats-shard-00-00.dxm5i.mongodb.net:27017: timed out (configured timeouts:
+socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>, <ServerDescription
+('mpkstats-shard-00-01.dxm5i.mongodb.net', 27017) server_type: Unknown, rtt: None>,
+<ServerDescription ('mpkstats-shard-00-02.dxm5i.mongodb.net', 27017) server_type: Unknown, rtt: None>]>
+Reason: cannot establish connection with MongoDB - current IP address not added to whitelist
+Solution: server IP address needs to be added in W3 after setting a serwer in AWS,
+
+2026-03-16 17:49:21,615: CRITICAL:
+Saving vehicles position in Vehicles table in db failed: 'NoneType' object has no attribute 'admin'
+Reason: function job_data_download() need Mongo Client to work properly.
+If connection with MongoDB cannot be achieved, function connection_establisher() returns None
+NoneType object has no attributes
+Solution:
+data_sender.py -> connection_establisher(uri) - added while loop with 5 attempts to establish connection
+micro_jobs.py -> job_data_download() - if client is None, warning message will show in console; This data download
+iteration failed, data hasn't been saved.

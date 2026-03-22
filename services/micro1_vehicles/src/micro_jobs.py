@@ -18,8 +18,11 @@ def job_data_download():
         sleep(30)"""
     # client = connection_establisher(db_uri)
     client = connection_establisher(os.getenv("MONGO_URI"))
-    vehicles(client)
-    client.close()
+    if client is None:
+        main_logger("error", "Cannot complete job_data_download! Data skipped.")
+    else:
+        vehicles(client)
+        client.close()
     # sleep(30)
 
 
