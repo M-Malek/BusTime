@@ -20,3 +20,9 @@ Solution:
 data_sender.py -> connection_establisher(uri) - added while loop with 5 attempts to establish connection
 micro_jobs.py -> job_data_download() - if client is None, warning message will show in console; This data download
 iteration failed, data hasn't been saved.
+
+2026-04-02 21:14:30,996: ERROR: Suprising error during executing Micro2 main.py:
+Connect timeout on endpoint URL: <url>
+Reason: bad settings of Minio endpoint in config.env file. Microservice 2 cannot find Minio.
+Solution:
+Checked variable and set correct one

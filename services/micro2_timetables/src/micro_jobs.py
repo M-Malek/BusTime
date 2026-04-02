@@ -10,6 +10,7 @@ from pymongo.errors import ConnectionFailure
 import os
 import json
 from src.ztm_site_checker import checksum_checker
+from botocore.config import Config
 
 
 def db_connector():
@@ -76,19 +77,29 @@ def job_normal():
     """Load and save to S3 all stoptimes data"""
     # Check if its necessary to download new data:
     if checksum_checker():
+        # print("Debug: new data needs to be downloaded!")
+        stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+        # print("Debug: New data downloaded! Starting to saving data")
+        # Set S3 config procedures: set maximum timeouts attempts
+        config = Config(
+            connect_timeout=3,
+            read_timeout=5,
+            retries={'max_attempts': 3}
+        )
         s3 = client(
             "s3",
             endpoint_url=os.getenv("S3_ENDPOINT"),
             aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
             aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+            config=config
         )
 
         bucket_name = os.getenv("S3_BUCKET")
         # bucket_prefix = "line-"
         bucket_prefix = os.getenv("S3-BUCKET_PREFIX")
-
-        if not s3_checker(s3):
-            stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+        # print("Connected to s3!")
+        if s3_checker(s3):
+            # stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
             save_data(s3, stoptimes_data)
             main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
         else:

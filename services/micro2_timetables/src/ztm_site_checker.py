@@ -10,6 +10,7 @@ import re
 from pymongo import MongoClient, DESCENDING
 from datetime import datetime
 from src.log_logging import main_logger
+from src.zip_filename_reader import filename_reader
 
 """
 4 steps:
@@ -22,11 +23,15 @@ from src.log_logging import main_logger
 
 def checksum_creator():
     url = os.getenv("ZTM_URL")
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
 
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     response.raise_for_status()
 
     hash = hashlib.sha256()
+    file_name = filename_reader(response)
 
     # 1 step - creating checksum and file information
     # Create checksum
@@ -35,18 +40,6 @@ def checksum_creator():
             hash.update(chunk)
 
     checksum = hash.hexdigest()
-
-    # Read filename from response headers - Content-Disposition
-    content_disposition = response.headers.get("Content-Disposition")
-
-    if content_disposition:
-        match = re.search(r'filename="?([^"]+)"?', content_disposition)
-        if match:
-            file_name = match.group(1)
-        else:
-            file_name = "unknown.zip"
-    else:
-        file_name = "unknown.zip"
 
     return checksum, file_name
 

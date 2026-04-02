@@ -7,6 +7,7 @@ import json
 import os
 
 import boto3
+from botocore.exceptions import EndpointConnectionError, ClientError
 
 from src.log_logging import main_logger
 
@@ -16,16 +17,23 @@ from src.log_logging import main_logger
 
 def s3_checker(client):
     """
-    Check, if there is connection with S3 - S3 has data container
-    :return: True if connection else False
+    Check, if:
+    - there is connection with S3
+    - S3 has data container with line's data
+
+    :return: True if connection and empty data container - new data should be downloaded else False
     """
     # s3 = boto3.client("s3")
 
     # response = s3.list_objects_v2(Bucket=os.getenv("S3_BUCKET"))
-    response = client.list_objects_v2(Bucket=os.getenv("S3_BUCKET"))
-    if "Contests" in response:
-        return True
-    else:
+    try:
+        response = client.list_objects_v2(Bucket=os.getenv("S3_BUCKET"))
+        return False if "Contents" in response else True
+
+    except EndpointConnectionError:
+        return False
+    except ClientError as e:
+        mian_logger("error", f"Cannot check S3 status! Error: {e}")
         return False
 
 
@@ -96,7 +104,7 @@ def save_data(client, data):
     bucket_name = os.getenv("S3_BUCKET")
     bucket_prefix = os.getenv("S3_BUCKET_PREFIX")
     saved_lines = ""
-
+    print("Debug: starting to save data!")
     for line, line_data in data.items():
         saved_line_number = single_data_saver_with_retry(client, line_data, line)
         saved_lines += saved_line_number + ", "
