@@ -16,20 +16,21 @@ sqs = boto3.client(
 
 QUEUE_URL = os.getenv("QUEUE_URL")
 MESSAGES_SET = {
-    "vehicle_update": ("GTFS_UPDATED", ["feeds.pb", "vehicles.pb"]),
-    "vehicle_wipeout": ("GTFS_WIPEOUT", ["MONGO_DB"]),
-    "stoptimes_normal": ("STOP_TIMES_NORMAL", ["stop_times.txt", "agency.txt", "routes.txt", "trips.txt"]),
-    "stoptimes_shapes": ("STOP_TIMES_SHAPES", ["shapes.txt"]),
-    "stoptimes_stops": ("STOP_TIMES_STOPS", ["stops.txt"]),
-    "statistic_normal": ("STATISTIC_NORMAL", ["MONGO_DB"])
+    # "vehicle_update": ("GTFS_UPDATED", ["feeds.pb", "vehicles.pb"]),
+    # "vehicle_wipeout": ("GTFS_WIPEOUT", ["MONGO_DB"]),
+    "stoptimes_normal": ("STOP_TIMES_NORMAL", "Microservice 2", "Create new vehicle data in S3"),
+    "stoptimes_shapes": ("STOP_TIMES_SHAPES", "Microservice 2", "Download shapes data"),
+    "stoptimes_stops": ("STOP_TIMES_STOPS", "Microservice 2", "Recreate stops information in MongoDB"),
+    "statistic_normal": ("STATISTIC_NORMAL", "Microservice 3", "Generate new statistic from data")
 }
 
 
-def message_creator(event_type: str, changed_files: list):
+def message_creator(event_type: str, worker: str, changed_files: list):
     """
     Generate automate message for Amazon SQS
-    :param event_type:
-    :param changed_files:
+    :param event_type: str: type of work to do from MESSAGES_SET global
+    :param worker: str: worker type - information about Microservice, which has to complete this job
+    :param changed_files: str: information about changes data in MongoDB or S3 from MESSAGES_SET
     :return: Ready SQS Message for AWS
     """
     message = {
@@ -38,8 +39,8 @@ def message_creator(event_type: str, changed_files: list):
             "source": "micro4_watcher",
             "timestamp": datetime.now().isoformat(),
             "payload": {
-                        "stop_times_date": "2026-03-02",
-                        "changed_files": changed_files
+                        "worker": worker,
+                        "changed_data": changed_files
                         }
             }
     return message

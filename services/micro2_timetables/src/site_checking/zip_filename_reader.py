@@ -5,20 +5,18 @@ This option is needed to check, if we have to download new data to S3.
 """
 from zipfile import ZipFile
 import io
-from pandas import DataFrame, read_csv
+from pandas import read_csv
 
 
-def filename_reader(response):
+def filename_reader(data):
     # Debug:
-    print(response.status_code)
-    print(response.headers.get("Content-Type"))
-    print(response.content[:200])
-    zip_file = ZipFile(io.BytesIO(response.content))
-
+    # zip_file = ZipFile(io.BytesIO(response.content))
+    zip_file = ZipFile(data)
     # Otwórz calendar.txt
     with zip_file.open("calendar.txt") as file:
         dates_dataframe = read_csv(file)
-        print(dates_dataframe)
+        start_date = dates_dataframe["start_date"][0]
+        end_date = dates_dataframe["end_date"][0]
         file.close()
+        return f"{start_date}-{end_date}"
 
-    return "None - already"

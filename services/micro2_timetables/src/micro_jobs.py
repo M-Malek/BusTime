@@ -9,7 +9,7 @@ from src.log_logging import main_logger
 from pymongo.errors import ConnectionFailure
 import os
 import json
-from src.ztm_site_checker import checksum_checker
+from src.site_checking.ztm_site_checker import checksum_checker
 from botocore.config import Config
 
 
@@ -38,6 +38,7 @@ def job_stops():
     client = db_connector()
     db_set = client["Poznan"]
     collection = db_set["Stops"]
+    collection.drop()
     collection.insert_many(stops_data.to_dict("records"))
     main_logger("info", "Downloaded stops saved in MongoDB")
 
@@ -104,23 +105,3 @@ def job_normal():
             main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
         else:
             main_logger("info", "Stop times data already stored in S3. New data hasn't been downloaded.")
-    #
-    # # Lines only for debug: test when S3 bucket hasn't been available:
-    # import json
-    # with open("json_stops.json", "w") as file:
-    #     json.dump(stoptimes_data, file)
-    #     file.close()
-    #
-    # for line, data in stoptimes_data.items():
-    #     file_key = f"{bucket_prefix}{line}.json"
-    #     try:
-    #         s3.put_object(
-    #             Bucket=os.getenv("S3_BUCKET"),
-    #             Key=file_key,
-    #             Body=json.dumps(data, ensure_ascii=False).encode("utf-8"),
-    #             ContentType="application/json"
-    #         )
-    #     except Exception as e:
-    #         main_logger("warning", f"Micro2 job_normal: failed to save line: {line}, error: {e}")
-    #
-    # main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
