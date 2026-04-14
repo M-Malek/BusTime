@@ -1,7 +1,9 @@
-from src.zip_parser import zip_parser
-from src.zip_stops_parser import zip_parser_stops
-from src.zip_shapes_reader import shape_parser
-from src.zip_saver import s3_checker, save_data
+from src.zip_managing.zip_parser import zip_parser
+from src.zip_managing.zip_stops_parser import zip_parser_stops
+from src.zip_managing.zip_shapes_reader import shape_parser
+from src.zip_managing.zip_saver import s3_checker, save_data, empty_s3
+from src.zip_managing.zip_gather import zip_downloading
+from src.zip_managing.zip_reader import ZIPReader
 from boto3 import client
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -76,32 +78,82 @@ def job_shapes():
 
 def job_normal():
     """Load and save to S3 all stoptimes data"""
-    # Check if its necessary to download new data:
-    if checksum_checker():
-        # print("Debug: new data needs to be downloaded!")
-        stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
-        # print("Debug: New data downloaded! Starting to saving data")
-        # Set S3 config procedures: set maximum timeouts attempts
-        config = Config(
-            connect_timeout=3,
-            read_timeout=5,
-            retries={'max_attempts': 3}
-        )
-        s3 = client(
-            "s3",
-            endpoint_url=os.getenv("S3_ENDPOINT"),
-            aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
-            aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
-            config=config
-        )
 
-        bucket_name = os.getenv("S3_BUCKET")
-        # bucket_prefix = "line-"
-        bucket_prefix = os.getenv("S3-BUCKET_PREFIX")
-        # print("Connected to s3!")
-        if s3_checker(s3):
-            # stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+    # Check if it's necessary to download new data:
+    def status_describer(s3_object):
+        """
+        Describe status for job_normal:
+        - if there is new file on ZTM server and S3 is empty - download new data - return status 1
+        - if there is empty S3 - download new data - return status 2
+        - if there is new file on ZTM server and S3 isn't empty - empty S3 and download new data - return status 3
+        - if there isn't new file on ZTM server - skip - return status 4
+        """
+        if checksum_checker() and s3_checker(s3_object):
+            return 1
+        elif s3_checker(s3_object):
+            return 2
+        elif checksum_checker() and not s3_checker(s3_object):
+            return 3
+        elif checksum_checker():
+            return 4
+
+    config = Config(
+        connect_timeout=3,
+        read_timeout=5,
+        retries={'max_attempts': 3}
+    )
+    s3 = client(
+        "s3",
+        endpoint_url=os.getenv("S3_ENDPOINT"),
+        aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
+        aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+        config=config
+    )
+    status = status_describer(s3)
+    match status:
+        case 1:
+            stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
             save_data(s3, stoptimes_data)
-            main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
-        else:
-            main_logger("info", "Stop times data already stored in S3. New data hasn't been downloaded.")
+            main_logger("info", "Micro2 micro_jobs:job_normal - new.zip file and empty S3: new data saved!")
+        case 2:
+            stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+            save_data(s3, stoptimes_data)
+            main_logger("info", "Micro2 micro_jobs:job_normal - empty S3: new data saved!")
+        case 3:
+            empty_s3(s3)
+            stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+            save_data(s3, stoptimes_data)
+            main_logger("info", "Micro2 micro_jobs:job_normal - new .zip file: new data saved!")
+        case 4:
+            main_logger("info", "S3 has data and new .zip file hasn't been detected. New data hasn't been downloaded.")
+        case _:
+            main_logger("info", "Microservice 2 cannot identify, which action done.")
+
+    # if checksum_checker():
+    #     # print("Debug: new data needs to be downloaded!")
+    #     stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+    #     # print("Debug: New data downloaded! Starting to saving data")
+    #     # Set S3 config procedures: set maximum timeouts attempts
+    #     config = Config(
+    #         connect_timeout=3,
+    #         read_timeout=5,
+    #         retries={'max_attempts': 3}
+    #     )
+    #     s3 = client(
+    #         "s3",
+    #         endpoint_url=os.getenv("S3_ENDPOINT"),
+    #         aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
+    #         aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+    #         config=config
+    #     )
+    #
+    #     bucket_name = os.getenv("S3_BUCKET")
+    #     # bucket_prefix = "line-"
+    #     bucket_prefix = os.getenv("S3-BUCKET_PREFIX")
+    #     # print("Connected to s3!")
+    #     if s3_checker(s3):
+    #         # stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+    #         save_data(s3, stoptimes_data)
+    #         main_logger("info", "Micro2 micro_jobs:job_normal - data saved!")
+    #     else:
+    #         main_logger("info", "Stop times data already stored in S3. New data hasn't been downloaded.")

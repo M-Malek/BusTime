@@ -4,8 +4,8 @@ Testing micro2 in given parameters: check how .zip file ise read
 """
 import pandas
 
-from services.micro2_timetables.src.zip_gather import zip_downloading
-from services.micro2_timetables.src.zip_reader import ZIPReader
+from services.micro2_timetables.src.zip_managing.zip_gather import zip_downloading
+from services.micro2_timetables.src.zip_managing.zip_reader import ZIPReader
 from shared.tools.env_os_variables import dc_zip_url
 
 from sys import getsizeof
@@ -49,8 +49,7 @@ def test1():
 
 def test2():
     """Only idea testing purposes"""
-    from services.micro2_timetables.src.zip_parser import Line, Routes, Stop
-    import json
+    from services.micro2_timetables.src.zip_managing.zip_parser import Line, Routes, Stop
 
     stop1 = Stop("221_2", "14:52", "14:53", 1)
     stop2 = Stop("221_2", "14:55", "14:56", 2)
@@ -63,7 +62,7 @@ def test2():
 
 
 def test3():
-    from services.micro2_timetables.src.zip_parser import zip_parser
+    from services.micro2_timetables.src.zip_managing.zip_parser import zip_parser
     from shared.tools.env_os_variables import dc_zip_url
     import json
 
@@ -75,7 +74,7 @@ def test3():
 
 def test4():
     """Testing zip_stop_parser!"""
-    from services.micro2_timetables.src.zip_stops_parser import zip_parser_stops
+    from services.micro2_timetables.src.zip_managing.zip_stops_parser import zip_parser_stops
     from shared.tools.env_os_variables import dc_zip_url
 
     raw_zip = zip_downloading(dc_zip_url)
@@ -86,7 +85,7 @@ def test4():
 
 def test5():
     """Testing shapes_parser!"""
-    from services.micro2_timetables.src.zip_shapes_reader import shape_parser
+    from services.micro2_timetables.src.zip_managing.zip_shapes_reader import shape_parser
     from shared.tools.env_os_variables import dc_zip_url
 
     raw_zip = zip_downloading(dc_zip_url)

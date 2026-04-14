@@ -5,7 +5,7 @@ with all stop times informations
 """
 
 # Import
-from src.zip_reader import ZIPReader
+from src.zip_managing.zip_reader import ZIPReader
 # from services.micro2_timetables.src.zip_gather import zip_downloading
 
 

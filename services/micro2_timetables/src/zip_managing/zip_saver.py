@@ -26,6 +26,7 @@ def s3_checker(client):
     # s3 = boto3.client("s3")
     # Błąd logiczny! Ten kod uruchamia się zawsze
     # response = s3.list_objects_v2(Bucket=os.getenv("S3_BUCKET"))
+    print("Debug: s3_checker is running!")
     try:
         response = client.list_objects_v2(Bucket=os.getenv("S3_BUCKET"))
         if "Contents" in response:
@@ -43,6 +44,14 @@ def s3_checker(client):
         mian_logger("error", f"Cannot check S3 status! Error: {e}")
         return False
 
+
+def empty_s3(client):
+    """Delete data from S3 bucket described in config.env"""
+    attempt = 3
+    bucket = os.getenv("S3_BUCKET")
+    while attempt >= 0:
+        client.Object(bucket).delete() # how to delete data from s3?
+        attempt -= 1
 
 # def save_zip_data(client, data):
 #     """
@@ -67,6 +76,7 @@ def s3_checker(client):
 #         main_logger("info", "ZIP data saved in AWS Bucket~!")
 #     except Exception as e:
 #         main_logger("error", f"Error during saving .zip data to AWS Bucket: {e}")
+
 
 def single_data_saver_with_retry(client, single_data, line_number):
     """

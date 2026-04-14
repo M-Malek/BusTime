@@ -54,11 +54,11 @@ strefa - stops.txt
 """
 import datetime
 
-from services.micro2_timetables.src.zip_reader import ZIPReader
-from services.micro2_timetables.src.zip_gather import zip_downloading
+from services.micro2_timetables.src.zip_managing.zip_reader import ZIPReader
+from services.micro2_timetables.src.zip_managing.zip_gather import zip_downloading
 
 
-from services.micro2_timetables.src.zip_parser import StopTime, Shape
+from services.micro2_timetables.src.zip_managing.zip_parser import StopTime, Shape
 
 # Pierwsza wersja kodu parsera .zip - bardzo powolne działanie! - ok. 30 minut na jedną operację pełnego odczytu!
 def zip_parser2(url_raw_data_set):
