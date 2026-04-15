@@ -41,7 +41,7 @@ def s3_checker(client):
     except EndpointConnectionError:
         return False
     except ClientError as e:
-        mian_logger("error", f"Cannot check S3 status! Error: {e}")
+        main_logger("error", f"Cannot check S3 status! Error: {e}")
         return False
 
 
