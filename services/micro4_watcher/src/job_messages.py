@@ -9,17 +9,20 @@ from src.sqs_messages import MESSAGES_SET, message_creator
 
 
 def message_get_stoptimes():
-    message_creator(MESSAGES_SET["stoptimes_normal"][0])
+    message = message_creator(MESSAGES_SET["stoptimes_normal"][0])
+    return message
 
 
 def message_get_statistic():
-    message_creator(MESSAGES_SET["statistic_normal"][0])
+    message = message_creator(MESSAGES_SET["statistic_normal"][0])
+    return message
 
 
 def message_get_stops():
-    message_creator(MESSAGES_SET["stoptimes_stop"][0])
+    message = message_creator(MESSAGES_SET["stoptimes_stop"][0])
+    return message
 
 
 def message_get_shapes():
-    message_creator(MESSAGES_SET["stoptimes_shapes"][0])
-
+    message = message_creator(MESSAGES_SET["stoptimes_shapes"][0])
+    return message
