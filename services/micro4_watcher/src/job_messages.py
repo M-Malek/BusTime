@@ -10,6 +10,8 @@ from src.sqs_messages import MESSAGES_SET, message_creator
 
 def message_get_stoptimes():
     message = message_creator(MESSAGES_SET["stoptimes_normal"][0])
+    #Debug:
+    print(message)
     return message
 
 

@@ -65,7 +65,13 @@ def checksum_checker():
     client = MongoClient(os.getenv("MONGO_URI"))
     db = client["Poznan"]
     collection = db["Stop_times_arch"]
-    last_checksum = dict(get_latest_checksum(collection))['checksum']
+    # Debug:
+    try:
+        last_checksum = dict(get_latest_checksum(collection))['checksum']
+    except TypeError as e:
+        # If TypeError occurred: there is no data about last .zip file. Checksum hasn't been created yet
+        last_checksum = 0
+        # So program will create something (it doesn't care what) to achieve running of checksum_compare below"
     # print(f"old checksum: {last_checksum}, type: {type(last_checksum)}")
     # print(f"new checksum {new_checksum}, type: {type(new_checksum)}")
     # print(f"Debug: name of file: {file_name}")

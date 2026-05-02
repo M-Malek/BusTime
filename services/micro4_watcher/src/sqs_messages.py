@@ -29,6 +29,7 @@ def message_creator(message_set: tuple):
         location = message_set[4]
     :return: message: dict - Ready SQS Message for AWS
     """
+    print(f"Debug: {message_set}")
     event_type = message_set[0]
     worker = message_set[1]
     change_type = message_set[2]
@@ -53,16 +54,29 @@ def message_creator(message_set: tuple):
 
 def send_event(message_set: tuple):
 
-    message_body = message_creator()
+    message_body = message_creator(message_set)
     sqs_attempts = 3
 
     while sqs_attempts >= 0:
         try:
+            """
+            <--- Amazon SQS code section --->
+            Turned off for offline testing with ElastiqMQ. In production, replace ElasticMQ code section with this code
+            below:
             sqs = boto3.client(
                 "sqs",
                 region_name="eu-central-1",
                 aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
                 aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            )
+            """
+            """<--- ElasticMQ code section --->"""
+            sqs = boto3.client(
+                "sqs",
+                endpoint_url=os.getenv("QUEUE_URL"),
+                region_name="elasticmq",
+                aws_access_key_id="x",
+                aws_secret_access_key="x"
             )
             response = sqs.send_message(
                 QueueUrl=QUEUE_URL,
