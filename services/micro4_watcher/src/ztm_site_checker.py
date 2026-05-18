@@ -60,26 +60,28 @@ def get_latest_checksum(collection):
 
 def checksum_compare(checksum_new, checksum_old):
     if checksum_new == checksum_old:
-        return True
-    else:
         return False
+    else:
+        return True
 
 
 def checksum_checker():
-
+    print("Debug: checksum_checker is running!")
+    a = input()
     new_checksum, file_name = checksum_creator()
     client = MongoClient(os.getenv("MONGO_URI"))
     db = client["Poznan"]
     collection = db["Stop_times_arch"]
     last_checksum = get_latest_checksum(collection)
+    print(f"Debug in checksum_compare: new checksum: {new_checksum}, old checksum: {last_checksum}")
 
-    if not checksum_compare(new_checksum, last_checksum):
+    if checksum_compare(new_checksum, last_checksum):
         # There is new checksum - new .zip file on ZTM server detected
         main_logger("info", "New file on ZTM server detected!")
         collection.insert_one({
             "checksum": new_checksum,
             "file_name": file_name,
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(datetime.timezone.utc)
         })
         client.close()
         return True

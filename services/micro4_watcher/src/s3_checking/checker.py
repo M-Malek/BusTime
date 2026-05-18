@@ -17,7 +17,8 @@ def s3_checker(client):
     # response = s3.list_objects_v2(Bucket=os.getenv("S3_BUCKET"))
     print("Debug: s3_checker is running!")
     try:
-        response = client.list_objects_v2(Bucket=os.getenv("S3_BUCKET"))
+        response = client.list_objects_v2(
+            Bucket=os.getenv("S3_BUCKET"))
         if "Contents" in response:
             print("S3 has data!")
             return False
@@ -28,6 +29,7 @@ def s3_checker(client):
         # return False if "Contents" in response else True
 
     except EndpointConnectionError:
+        main_logger("error", "Endpoint Connection Error!")
         return False
     except ClientError as e:
         main_logger("error", f"Cannot check S3 status! Error: {e}")

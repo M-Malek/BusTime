@@ -8,14 +8,6 @@ import boto3
 from src.log_logging import main_logger
 
 QUEUE_URL = os.getenv("QUEUE_URL")
-MESSAGES_SET = {
-    # "vehicle_update": ("GTFS_UPDATED", ["feeds.pb", "vehicles.pb"]),
-    # "vehicle_wipeout": ("GTFS_WIPEOUT", ["MONGO_DB"]),
-    "stoptimes_normal": ("STOP_TIMES_NORMAL", "microservice_2", "vehicle_data", "update", f"S3/ztm_poznan"),
-    "stoptimes_shapes": ("STOP_TIMES_SHAPES", "microservice_2", "shape_data", "download/shape", ""),
-    "stoptimes_stops": ("STOP_TIMES_STOPS", "microservice_2", "stops_data", "download/stops", "MONGODB/stops"),
-    "statistic_normal": ("STATISTIC_NORMAL", "microservice_3", "vehicles_stats", "statistic", "MONGODB/stats")
-}
 
 
 def message_creator(message_set: tuple):
@@ -29,7 +21,8 @@ def message_creator(message_set: tuple):
         location = message_set[4]
     :return: message: dict - Ready SQS Message for AWS
     """
-    print(f"Debug: {message_set}")
+    print(f"Debug in message_creator: {message_set}")
+    print(type(message_set))
     event_type = message_set[0]
     worker = message_set[1]
     change_type = message_set[2]
@@ -52,11 +45,17 @@ def message_creator(message_set: tuple):
     return message
 
 
-def send_event(message_set: tuple):
+def send_event(message_set: dict):
+    """
+    Send event to SQS
+    :param message_set: dict, ready by func message_creator dictionary with SQS message
+    :return:
+    """
 
-    message_body = message_creator(message_set)
+    # message_body = message_creator(message_set)
+    message_body = message_set
     sqs_attempts = 3
-
+    print("Debug: starting to send message to SQS")
     while sqs_attempts >= 0:
         try:
             """
@@ -73,16 +72,19 @@ def send_event(message_set: tuple):
             """<--- ElasticMQ code section --->"""
             sqs = boto3.client(
                 "sqs",
-                endpoint_url=os.getenv("QUEUE_URL"),
+                endpoint_url=os.getenv("S3_ENDPOINT"),
                 region_name="elasticmq",
                 aws_access_key_id="x",
                 aws_secret_access_key="x"
             )
+            print("Debug: połączono z SQS")
             response = sqs.send_message(
-                QueueUrl=QUEUE_URL,
+                QueueUrl=os.getenv("S3_QUEUE_URL"),
                 MessageBody=json.dumps(message_body),
             )
-            main_logger("info", f"New SQS message for {message_set[1]} created. ID: {response['event_id']}")
+            print(type(message_set))
+            main_logger("info", f"New SQS message for {message_set} created. ID: {response['MessageId']}")
+            break
         except EndpointConnectionError:
             main_logger("warning", f"Sending SQS message for {message_set[1]} failed. No connection with SQS. "
                                    f"Attempts left: {sqs_attempts}")
@@ -99,7 +101,7 @@ def send_event(message_set: tuple):
             main_logger("warning", f"Sending SQS message for {message_set[1]} failed. Unknown error: {e}. "
                                    f"Attempts left: {sqs_attempts}")
 
-    sqs_attempts -= 1
+        sqs_attempts -= 1
 
     if sqs_attempts == 0:
         main_logger("error", f"SQS message for {message_set[1]} cannot be saved in SQS!")

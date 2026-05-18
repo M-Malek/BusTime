@@ -75,7 +75,7 @@ def checksum_checker():
     # print(f"old checksum: {last_checksum}, type: {type(last_checksum)}")
     # print(f"new checksum {new_checksum}, type: {type(new_checksum)}")
     # print(f"Debug: name of file: {file_name}")
-
+    print(f"Debug in checksum_compare: new checksum: {new_checksum}, old checksum: {last_checksum}")
     if checksum_compare(new_checksum, last_checksum):
         main_logger("info", "There isn't new .zip file")
         client.close()

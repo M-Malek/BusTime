@@ -16,19 +16,23 @@ load_dotenv("config.env")
 
 
 async def check_ztm():
+    # print("Debug: check_ztm is running!")
     status = status_describer()
     print(f"Debug: status number: {status}")
     match status:
         case 1 | 2:
             #  Download new data
             msg = message_get_stoptimes()
+            print(f"Debug in check_ztm: msg: {msg}")
             send_event(msg)
             main_logger("info", "New data on ZTM site: SQS message send: Download new stop times data")
         case 3:
             # Download new data, run statistic
             msg_stat = message_get_statistic()
+            print(f"Debug in check_ztm: msg_stat: {msg_stat}")
             send_event(msg_stat)
             msg_data = message_get_stoptimes()
+            print(f"Debug in check_ztm: msg_data: {msg_data}")
             send_event(msg_data)
             main_logger("info", "New data on ZTM site: SQS messages send: Download new stop times data, make statistic")
         case 4:
@@ -41,6 +45,7 @@ async def check_ztm():
 
 async def run_statistic():
     msg_stat = message_get_statistic()
+    print(f"Debug in run_statistic: msg_stat: {msg_stat}")
     send_event(msg_stat)
     main_logger("info", "Automatic SQS message for statistic send!")
 
