@@ -1,3 +1,5 @@
+from urllib import response
+
 import boto3
 from botocore.exceptions import EndpointConnectionError, ClientError
 from src.log_logging import main_logger
@@ -15,7 +17,6 @@ def s3_checker(client):
     # s3 = boto3.client("s3")
     # Błąd logiczny! Ten kod uruchamia się zawsze
     # response = s3.list_objects_v2(Bucket=os.getenv("S3_BUCKET"))
-    print("Debug: s3_checker is running!")
     try:
         response = client.list_objects_v2(
             Bucket=os.getenv("S3_BUCKET"))

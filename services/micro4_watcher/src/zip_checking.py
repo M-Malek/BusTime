@@ -12,10 +12,11 @@ def status_describer():
     - if there is new file on ZTM server and S3 is empty - download new data - return status 1
     - if there is empty S3 - download new data - return status 2
     - if there is new file on ZTM server and S3 isn't empty - empty S3 and download new data - return status 3
-    - if there isn't new file on ZTM server - skip - return status 4
+    - if there isn't new file on ZTM server and S3 has data - skip - return status 4
     """
     checksum_bool = checksum_checker()
-    print(f"Debug in status_describer: checksum_bool: {checksum_bool}")
+    # print(f"Debug in status_describer: checksum_bool: {checksum_bool}")
+    print("Starting to connect with S3 Bucket!")
     try:
         config = Config(
             connect_timeout=3,
@@ -29,13 +30,24 @@ def status_describer():
             aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
             config=config
         )
-        # print(s3.meta.endpoint_url)
+        #print(s3.meta.endpoint_url)
+        #a= input("Debug: Do you want to test connection with S3? (y/n): ")
     except Exception as e:
         main_logger("error", "Cannot check s3 and checksum to define an action")
         return 5
-    # s3_bool = s3_checker(s3)
-    s3_bool = True
-    if checksum_bool and s3_bool:
+    s3_bool = s3_checker(s3)
+    print(f"Debug in status_describer: checksum_bool: {checksum_bool}, s3_bool: {s3_bool}"  )
+    if s3_bool == False:
+        return 2
+    if checksum_bool:
+        if s3_bool:
+            return 1
+        else:
+            return 3
+    if s3_bool == False and checksum_bool == False:
+        return 4
+    
+    """if checksum_bool and s3_bool:
         return 1
     elif s3_bool:
         return 2
@@ -44,4 +56,4 @@ def status_describer():
     elif checksum_bool:
         return 4
     else:
-        return None
+        return None"""

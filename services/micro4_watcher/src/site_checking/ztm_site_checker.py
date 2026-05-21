@@ -61,6 +61,7 @@ def checksum_checker():
     Check hash.sha256() sum's of zip files: already stored in Mongo and from ZTM website
     :return: True if there is a new .zip file detected on ZTM website, else False
     """
+    # print("Debug: this checksum_checker is running!")
     new_checksum, file_name = checksum_creator()
     client = MongoClient(os.getenv("MONGO_URI"))
     db = client["Poznan"]
@@ -68,14 +69,16 @@ def checksum_checker():
     # Debug:
     try:
         last_checksum = dict(get_latest_checksum(collection))['checksum']
+        # print(f"Debug in checksum_checker: last checksum from MongoDB: {last_checksum}")
     except TypeError as e:
         # If TypeError occurred: there is no data about last .zip file. Checksum hasn't been created yet
+        main_logger("warning", "There is no data about last .zip file in MongoDB collection. Checksum hasn't been created yet.")
         last_checksum = 0
         # So program will create something (it doesn't care what) to achieve running of checksum_compare below"
     # print(f"old checksum: {last_checksum}, type: {type(last_checksum)}")
     # print(f"new checksum {new_checksum}, type: {type(new_checksum)}")
     # print(f"Debug: name of file: {file_name}")
-    print(f"Debug in checksum_compare: new checksum: {new_checksum}, old checksum: {last_checksum}")
+    # print(f"Debug in checksum_compare: new checksum: {new_checksum}, old checksum: {last_checksum}")
     if checksum_compare(new_checksum, last_checksum):
         main_logger("info", "There isn't new .zip file")
         client.close()
