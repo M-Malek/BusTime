@@ -37,15 +37,16 @@ def status_describer():
         return 5
     s3_bool = s3_checker(s3)
     print(f"Debug in status_describer: checksum_bool: {checksum_bool}, s3_bool: {s3_bool}"  )
-    if s3_bool == False:
+    if s3_bool:
         return 2
     if checksum_bool:
         if s3_bool:
             return 1
-        else:
+        if not s3_bool:
             return 3
     if s3_bool == False and checksum_bool == False:
         return 4
+    return 5
     
     """if checksum_bool and s3_bool:
         return 1
