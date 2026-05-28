@@ -82,11 +82,11 @@ def job_normal():
     # Check if it's necessary to download new data:
     def status_describer(s3_object):
         """
-        Describe status for job_normal:
-        - if there is new file on ZTM server and S3 is empty - download new data - return status 1
-        - if there is empty S3 - download new data - return status 2
-        - if there is new file on ZTM server and S3 isn't empty - empty S3 and download new data - return status 3
-        - if there isn't new file on ZTM server - skip - return status 4
+        Describe logic for job_normal:
+        - if there is new file on ZTM server and S3 is empty - download new data - return logic 1
+        - if there is empty S3 - download new data - return logic 2
+        - if there is new file on ZTM server and S3 isn't empty - empty S3 and download new data - return logic 3
+        - if there isn't new file on ZTM server - skip - return logic 4
         """
         if checksum_checker() and s3_checker(s3_object):
             return 1

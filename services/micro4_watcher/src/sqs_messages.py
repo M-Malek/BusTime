@@ -21,8 +21,8 @@ def message_creator(message_set: tuple):
         location = message_set[4]
     :return: message: dict - Ready SQS Message for AWS
     """
-    print(f"Debug in message_creator: {message_set}")
-    print(type(message_set))
+    # print(f"Debug in message_creator: {message_set}")
+    # print(type(message_set))
     event_type = message_set[0]
     worker = message_set[1]
     change_type = message_set[2]
@@ -55,7 +55,7 @@ def send_event(message_set: dict):
     # message_body = message_creator(message_set)
     message_body = message_set
     sqs_attempts = 3
-    print("Debug: starting to send message to SQS")
+    # print("Debug: starting to send message to SQS")
     while sqs_attempts >= 0:
         try:
             """
@@ -77,12 +77,12 @@ def send_event(message_set: dict):
                 aws_access_key_id="x",
                 aws_secret_access_key="x"
             )
-            print("Debug: połączono z SQS")
+            # print("Debug: połączono z SQS")
             response = sqs.send_message(
                 QueueUrl=os.getenv("S3_QUEUE_URL"),
                 MessageBody=json.dumps(message_body),
             )
-            print(type(message_set))
+            # print(type(message_set))
             main_logger("info", f"New SQS message for {message_set} created. ID: {response['MessageId']}")
             break
         except EndpointConnectionError:

@@ -4,7 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 from src.job_messages import message_get_stops, message_get_statistic, message_get_stoptimes
-from src.zip_checking import status_describer
+from src.logic.status_describer import status_describer
 from src.sqs_messages import send_event
 from src.job_messages import message_get_stops, message_get_statistic, message_get_stoptimes
 from src.log_logging import main_logger

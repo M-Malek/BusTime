@@ -27,7 +27,7 @@ def main_logger(message_type, message_body):
     """
     Save log message to .log file in default microservice folder
     :param message: str, message for logger
-    :return: logging service status
+    :return: logging service logic
     """
     # Create logger object
     logger = logging.getLogger()

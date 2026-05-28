@@ -4,14 +4,12 @@ Detect new stop time on ZTM Poznań website
 """
 import os
 
-import requests
-import hashlib
-from io import BytesIO
-import re
-from pymongo import MongoClient, DESCENDING
+from pymongo import MongoClient
 from datetime import datetime
 from src.log_logging import main_logger
-from src.site_checking.zip_filename_reader import filename_reader
+from src.site_checking.checksum_creator import checksum_creator
+from src.site_checking.get_last_checksum import get_latest_checksum
+from src.site_checking.checksum_compare import checksum_compare
 
 """
 4 steps:
@@ -20,41 +18,6 @@ from src.site_checking.zip_filename_reader import filename_reader
 3 step - compare new checksum with checksum from MongoDB collection
 4 step - if checksums are equal, skip, else: set new SQS messages for another microservices
 """
-
-
-def checksum_creator():
-    url = os.getenv("ZTM_URL")
-
-    response = requests.get(url)
-    response.raise_for_status()
-
-    hash = hashlib.sha256()
-    file_name = filename_reader(BytesIO(response.content))
-
-    # 1 step - creating checksum and file information
-    # Create checksum
-    for chunk in response.iter_content(chunk_size=8192):
-        if chunk:
-            hash.update(chunk)
-
-    checksum = hash.hexdigest()
-
-    return checksum, file_name
-
-
-def get_latest_checksum(collection):
-    latest = collection.find_one(
-        sort=[("created_at", DESCENDING)]
-    )
-    return latest
-
-
-def checksum_compare(checksum_new, checksum_old):
-    if checksum_new == checksum_old:
-        return True
-    else:
-        return False
-
 
 def checksum_checker():
     """
