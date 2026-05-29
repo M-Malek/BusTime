@@ -1,33 +1,26 @@
 """Test for logic describer"""
-from src.logic.status_describer import status_describer
-from unittest.mock import Mock, patch
+from logic.status_describer import status_describer
 
-@patch("src.logic.status_describer.checksum_bool")
-@patch('src.logic.status_describer.s3_checker')
-@patch('src.logic.status_describer.client')
-def test_status_describer(mock_client, mock_checksum_bool, mock_s3_checker):
+
+def test_status_describer():
+
 
     # Case 1: simulate logic 1
-    mock_checksum_bool.return_value = True
-    mock_s3_checker.return_value = True
-
-    assert status_describer() == 1, "Should be 1"
+    #  s3_bool and checksum_bool are True
+    assert status_describer(True, True) == 1, "Should be 1"
 
     # Case 2: simulate logic 2
-    mock_checksum_bool.return_value = False
+    # s3 bool is True, checksum_bool is False
 
-    assert status_describer() == 2, "Should be 2"
+    assert status_describer(False, True) == 2, "Should be 2"
 
     # Case 3: simulate logic 3
-    mock_s3_checker.return_value = False
-
-    assert status_describer() == 3, "Should be 3"
+    # s3_bool is False, checksum_bool is True
+    assert status_describer(True, False) == 3, "Should be 3"
 
     # Case 4: simulate logic 4
-    mock_checksum_bool.return_value = False
-    mock_s3_checker.return_value = False
-
-    assert status_describer() == 4, "Should be 4"
+    # s3_bool and checksum_bool are False
+    assert status_describer(False, False) == 4, "Should be 4"
 
 
 test_status_describer()

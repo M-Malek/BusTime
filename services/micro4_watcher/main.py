@@ -1,10 +1,8 @@
 import asyncio
 import time
-from datetime import datetime
-from dotenv import load_dotenv
 import os
 from src.job_messages import message_get_stops, message_get_statistic, message_get_stoptimes
-from src.logic.status_describer import status_describer
+from src.logic.status_describer import get_status
 from src.sqs_messages import send_event
 from src.job_messages import message_get_stops, message_get_statistic, message_get_stoptimes
 from src.log_logging import main_logger
@@ -17,7 +15,7 @@ load_dotenv("config.env")
 
 async def check_ztm():
     # print("Debug: check_ztm is running!")
-    status = status_describer()
+    status = get_status()
     print(f"Debug: status number: {status}")
     match status:
         case 1 | 2:
