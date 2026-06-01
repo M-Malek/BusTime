@@ -1,5 +1,5 @@
 """Test for logic describer"""
-from logic.status_describer import status_describer
+from src.logic.status_describer import status_describer
 
 
 def test_status_describer():
@@ -22,5 +22,9 @@ def test_status_describer():
     # s3_bool and checksum_bool are False
     assert status_describer(False, False) == 4, "Should be 4"
 
+    # Case 5: simulate logic for error:
+    # s3_bool = True and checksum_bool = None
+    assert status_describer(checksum_bool=True, s3_bool=None) == 5, "Should be 5"
 
-test_status_describer()
+
+# test_status_describer()
