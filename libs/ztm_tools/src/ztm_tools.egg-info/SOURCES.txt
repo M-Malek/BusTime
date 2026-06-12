@@ -7,6 +7,8 @@ src/ztm_tools.egg-info/dependency_links.txt
 src/ztm_tools.egg-info/requires.txt
 src/ztm_tools.egg-info/top_level.txt
 src/ztm_tools/logging/logger.py
+src/ztm_tools/mongo_tools/check_collection.py
+src/ztm_tools/mongo_tools/mongo_connect.py
 src/ztm_tools/sqs/client.py
 src/ztm_tools/sqs/consume.py
 src/ztm_tools/sqs/designer.py

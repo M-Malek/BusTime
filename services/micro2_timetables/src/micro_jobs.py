@@ -11,7 +11,7 @@ from src.log_logging import main_logger
 from pymongo.errors import ConnectionFailure
 import os
 import json
-from src.site_checking.ztm_site_checker import checksum_checker
+from src.site_checking.checksum_checker import checksum_checker
 from botocore.config import Config
 
 

@@ -2,8 +2,7 @@ import time
 import os
 import asyncio
 from dotenv import load_dotenv
-from src.logic.actions import check_ztm, run_statistic
-
+from src.site_checking.ztm_site_checker import ztm_site_checker
 
 load_dotenv("config.env")
 
@@ -29,10 +28,12 @@ async def main():
         """
 
         # Debug:
-        await check_ztm()
+        # await check_ztm()
         # await run_statistic()
+        ztm_site_checker()
         time.sleep(15)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+

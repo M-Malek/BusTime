@@ -1,4 +1,4 @@
-from src.site_checking.ztm_site_checker import checksum_checker
+from src.site_checking.checksum_checker import checksum_checker
 from src.s3_checking.checker import s3_checker
 from src.s3_checking.s3_connect import s3_connect
 
@@ -35,24 +35,7 @@ def status_describer(checksum_bool, s3_bool):
     if not s3_bool and not checksum_bool:
         return 4
 
-    # if s3_bool:
-    #     return 2
-    # if checksum_bool:
-    #     if s3_bool:
-    #         return 1
-    #     if not s3_bool:
-    #         return 3
-    # if s3_bool == False and checksum_bool == False:
-    #     return 4
-    # return 5
-    
-    """if checksum_bool and s3_bool:
-        return 1
-    elif s3_bool:
-        return 2
-    elif checksum_bool and not s3_bool:
-        return 3
-    elif checksum_bool:
-        return 4
-    else:
-        return None"""
+
+def new_status_describer():
+    pass
+
