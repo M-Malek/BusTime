@@ -1,4 +1,4 @@
-from src.site_checking.checksum_checker import checksum_checker
+from trash.checksum_checker import checksum_checker
 from src.s3_checking.checker import s3_checker
 from src.s3_checking.s3_connect import s3_connect
 

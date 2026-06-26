@@ -11,7 +11,7 @@ def entry_creator(collection, new_checksum, filename: str, created_at, began_at,
     :param state: state of entry
     :return: MongoDB collection updated
     """
-    collection.insert_one({
+    new_entry = collection.insert_one({
         "checksum": new_checksum,
         "file_name": filename,
         "created_at": created_at,
@@ -19,3 +19,4 @@ def entry_creator(collection, new_checksum, filename: str, created_at, began_at,
         "url": url,
         "state": state
     })
+    return new_entry.inserted_id

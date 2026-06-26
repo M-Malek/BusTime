@@ -4,7 +4,7 @@ Downloading .zip file from ZTM server
 """
 import requests
 from io import BytesIO
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 from requests.exceptions import HTTPError
 from time import sleep
 

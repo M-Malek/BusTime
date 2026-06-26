@@ -7,7 +7,7 @@ from src.collector_runner import vehicles
 from src.data_sender import connection_establisher
 # from shared.tools.env_os_variables import db_uri
 import os
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 
 
 def job_data_download():

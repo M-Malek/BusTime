@@ -1,6 +1,6 @@
 from boto3 import client
 from botocore.config import Config
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 import os
 
 def s3_connect():

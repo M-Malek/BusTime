@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from botocore.exceptions import ClientError, EndpointConnectionError
 
 import boto3
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 
 QUEUE_URL = os.getenv("QUEUE_URL")
 
@@ -83,22 +83,27 @@ def send_event(message_set: dict):
                 MessageBody=json.dumps(message_body),
             )
             # print(type(message_set))
-            main_logger("info", f"New SQS message for {message_set} created. ID: {response['MessageId']}")
+            main_logger("info", f"New SQS message for {message_set} created. ID: "
+                                f"{response['MessageId']}")
             break
         except EndpointConnectionError:
-            main_logger("warning", f"Sending SQS message for {message_set[1]} failed. No connection with SQS. "
+            main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
+                                   f"No connection with SQS. "
                                    f"Attempts left: {sqs_attempts}")
         except ClientError as e:
             code = e.response['Error']['Code']
 
             if code == 'AccessDenied':
-                main_logger("warning", f"Sending SQS message for {message_set[1]} failed. Access denied. "
+                main_logger("warning", f"Sending SQS message for {message_set[1]} failed."
+                                       f"Access denied. "
                                        f"Attempts left: {sqs_attempts}")
             elif code == 'AWS.SimpleQueueService.NonExistentQueue':
-                main_logger("warning", f"Sending SQS message for {message_set[1]} failed. No SQS queue. "
+                main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
+                                       f"No SQS queue. "
                                        f"Attempts left: {sqs_attempts}")
         except Exception as e:
-            main_logger("warning", f"Sending SQS message for {message_set[1]} failed. Unknown error: {e}. "
+            main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
+                                   f"Unknown error: {e}. "
                                    f"Attempts left: {sqs_attempts}")
 
         sqs_attempts -= 1

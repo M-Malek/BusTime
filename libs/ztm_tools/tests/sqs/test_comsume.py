@@ -1,6 +1,6 @@
 """Tests for recive_messages.py and consume.py modules"""
-from ztm_tools.src.ztm_tools.sqs.receive_messages import receive_all_messages, delete_message
-from ztm_tools.src.ztm_tools.sqs.consume import consume
+from ztm_tools.sqs.receive_messages import receive_all_messages, delete_message
+from ztm_tools.sqs.consume import consume
 from unittest.mock import patch, MagicMock
 
 

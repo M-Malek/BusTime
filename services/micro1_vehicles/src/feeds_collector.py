@@ -10,7 +10,7 @@ from pandas import DataFrame
 import datetime
 
 from src.download_vehicle_data import download_vehicle_data
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 
 
 def feeds_manager(url_vehicle, url_feeds):

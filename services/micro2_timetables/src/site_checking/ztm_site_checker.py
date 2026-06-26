@@ -7,10 +7,9 @@ import os
 import requests
 import hashlib
 from io import BytesIO
-import re
 from pymongo import MongoClient, DESCENDING
 from datetime import datetime
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 from src.site_checking.zip_filename_reader import filename_reader
 
 """

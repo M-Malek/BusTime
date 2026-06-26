@@ -41,7 +41,7 @@ def main_logger(message_type, message_body):
         if "LOG_FILE" in os.environ:
             log_file = os.getenv("LOG_FILE")
         else:
-            log_file = "log_file.log"
+            log_file = "../../log_file.log"
         file_handler = logging.FileHandler(log_file)
         file_handler.setFormatter(formatter)
 

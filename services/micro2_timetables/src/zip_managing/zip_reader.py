@@ -4,7 +4,7 @@ Read downloaded .zip file
 """
 from pandas import DataFrame, read_csv
 from zipfile import ZipFile, BadZipfile
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 
 
 class ZIPReader:

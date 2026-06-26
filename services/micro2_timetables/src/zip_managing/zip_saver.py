@@ -6,10 +6,9 @@ Save data prepared by microservice 2 in DynamoDB
 import json
 import os
 
-import boto3
 from botocore.exceptions import EndpointConnectionError, ClientError
 
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 
 
 # from shared.tools.env_os_variables import aws_zip_bucket_name, aws_zip_object_key

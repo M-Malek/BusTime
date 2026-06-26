@@ -1,9 +1,11 @@
-from src.logic.status_describer import get_status
-from src.job_messages import message_get_stops, message_get_statistic, message_get_stoptimes
-from src.log_logging import main_logger
+from trash.status_describer import get_status
+from src.job_messages import message_get_statistic, message_get_stoptimes
+from trash.log_logging import main_logger
 from src.sqs_messages import send_event
-from ztm_tools.logging import logger
-
+from src.s3_checking.checker import s3_checker
+from src.s3_checking.s3_connect import s3_connect
+from src.logic.stoptime_watcher_logic import ztm_watcher_logic
+from src.site_checking.find_actual_schedule import find_actual_schedule
 
 async def check_ztm():
     # print("Debug: check_ztm is running!")
@@ -60,31 +62,36 @@ def ztm_site_checker():
     Main function
     :return: None
     """
-    """
-    
-    
-    """
-    from src.logic.stoptime_watcher_logic import ztm_watcher_logic
     # 1. Check if S3 bucket ztm_poznan is empty
+    s3_state = s3_checker(s3_connect())
+    if not s3_state:
+        main_logger("info", "Empty S3 bucket ztm_poznan! Downloading new data")
+        url = find_actual_schedule()
+        msg_stop_times = message_get_stoptimes(url)
+        send_event(msg_stop_times)
+        main_logger("info", "Sending new datatime")
+    else:
+        main_logger("info", "S3 bucket has data inside!")
+
     # 2. Check ztm_site
-    print(ztm_watcher_logic)
-    if ztm_watcher_logic == "data and statistic":
+    # print(ztm_watcher_logic)
+    main_logger("info", "Checking ZTM site")
+    ztm_state, url = ztm_watcher_logic()
+    if ztm_state == 1 and url is not None:
+        # There is new actual data on ZTM site
         # Send message to statistic
-        # Send message to download new data to S3
+        main_logger("info", "Detected new data on ZTM site")
         msg_stat = message_get_statistic()
         send_event(msg_stat)
         main_logger("info", "Sending statistic")
-        # Add to SQS message url to actual data!
+        # Send message to download new data to S3
         msg_stop_times = message_get_stoptimes()
         send_event(msg_stop_times)
         main_logger("info", "Sending new datatime")
 
-    elif ztm_watcher_logic == "statistic":
+    else:
         # Send message to statistic
+        main_logger("info", "There is no new data on ZTM site")
         msg_stat = message_get_statistic()
         send_event(msg_stat)
         main_logger("info", "Sending statistic")
-
-    elif ztm_watcher_logic == "No new data":
-        # Don't do anything
-        logger("info", "No new data detected")

@@ -1,5 +1,5 @@
 """Test for logic describer"""
-from src.logic.status_describer import status_describer
+from trash.status_describer import status_describer
 
 
 def test_status_describer():

@@ -9,7 +9,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo.errors import ConnectionFailure
 
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 # from shared.tools.env_os_variables import db_uri
 from os import getenv
 

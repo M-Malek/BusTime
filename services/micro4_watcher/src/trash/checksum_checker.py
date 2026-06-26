@@ -6,10 +6,10 @@ import os
 
 from pymongo import MongoClient
 from datetime import datetime
-from src.log_logging import main_logger
-from src.site_checking.checksum_creator import checksum_creator
+from trash.log_logging import main_logger
+from trash.checksum_creator import checksum_creator
 from src.site_checking.get_last_checksum import get_latest_checksum
-from src.site_checking.checksum_compare import checksum_compare
+from site_checking.checksum_compare import checksum_compare
 
 """
 4 steps:

@@ -5,7 +5,7 @@ Creator: M-Malek
 from google.protobuf.message import DecodeError
 import shared.tools.filestoolbox as FilesToolBox
 from google.transit import gtfs_realtime_pb2
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 
 
 def download_vehicle_data(url):

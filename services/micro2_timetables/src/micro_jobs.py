@@ -7,11 +7,11 @@ from src.zip_managing.zip_reader import ZIPReader
 from boto3 import client
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from src.log_logging import main_logger
+from trash.log_logging import main_logger
 from pymongo.errors import ConnectionFailure
 import os
 import json
-from src.site_checking.checksum_checker import checksum_checker
+from trash.checksum_checker import checksum_checker
 from botocore.config import Config
 
 

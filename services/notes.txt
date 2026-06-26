@@ -1,0 +1,56 @@
+Some notes and thoughts about program
+
+TODO:
+1. Create logic to send url via SQS
+2. Add back logic of checking S3 bucket
+3. Check logic: if ztm_logic always find newest actual schedule?
+4. Clean code!
+
+ztm_site_checker() description:
+1. Find last url with current date -> dane by last_ztm_zip, check it with mock
+2. Mam plik pasujący do dzisiejszej daty - sprawdzam jego checksum czy jest już w mongo
+sprawdzam czy ma on status active
+Jak nie ma go w mongo to go dodaje ze statusem active
+Jak jest w mongo ale nie ma statusu active to daje mu status active
+Potem wysyłam
+2. Save data about it to Mongo with his download_url!
+3. set status of entry as active
+4. Dodałem sobie ostatni plik pasujący do dzisiejszej daty do bazy danych -
+Raz na 3h sprawdzam sobie stronę ZTM - jak wykryję zmiany w pliku to zapisuje nowy checksum i od kiedy ma on być
+Jak sobie zapiszę to sprawdzam czy data od kiedy obowiązuje jest równa dacie dzisiejszej,
+Jak jest rónwa dacie dzisiejszej to wysyłam o statystykę,
+Jak zostanie zrobiona statystyka i dostanę zwrotną wiadomość SQS że jest zrobiona, to czyszczę sobie dane w S3 i
+zapisuje nowe rozkłady jazdy
+Watcher działa cały czas! sprawdza stronę ZTM, wystawia wiadomości o nowe dane i statystyke, pobiera od innych
+informacje o stanie mikroserwisów
+A ja zrobiłem że ma sprawdzić stronę i jak się coś zmieniło to se zmień :(
+
+
+do actions.py
+Jak to ma działać:
+    czytam SQS żeby sprawdzić wiadomości do mikroserwisu:
+    - odczytujemy informacje dotyczące zrobienia rzeczy przez inne mikroserwisy jako log
+    - zapisujemy do S3 do pliku json z logiem
+    - jak micro3 dostanie zapytanie to zwraca ten log
+    (do zrobienia w przyszłości)
+    Jeżeli ztm_watcher_logic zwróci "data and statistic":
+    mamy sytuację w której są nowe obowiązujące dane na stronie ZTM. Musimy najpierw zrobić statystykę a potem pobrać
+    nowe dane
+
+    Jeżeli ztm_watcher_logic zwróci "statistic":
+    Nie ma nowych obowiązujących danych, robimy statystykę
+
+    Jeżeli ztm_watcher_logic zwróci "no new data":
+    No w sumie robimy statystykę
+
+    Nie dopuszczamy do sytuacji kiedy S3, bucket ztm_poznań, jest puste - to oznacza bład w systemie
+    Micro 2 ma za zadanie pobierać dane do S3 po znalezieniu zlecenia w SQS
+    Micro 1 pobiera sobie dane do Mongo - raportuje raz na godzine status zadań do SQS dla Micro 3
+    Micro 3 pobiera sobie dane z Mongo, pobiera dane z S3. Robi statystykę. Potem usuwa wpisy z Mongo które wykorzystał
+    do zrobienia statystyki i, jak znajdzie odpowiednią wiadomość, usuwa dane z S3 bucket ztm_poznan.
+    Micro4 obserwuje stronę ztm, wysyła info o konieczności statystyki, zbiera logi i udostępnia je na żądanie
+    Określić, czy na żądanie czy wystarczy zapisywać je do 1 pliku a potem ze strony www dostęp
+
+Wiadomości SQS w payload muszą zawierać szczegółowe ale krótkie informacje o tym, co ma zrobić dany mikroserwis
+czyli np. Micro 3 wysyłając informacje dla micro 2, że są nowe dane, musi mu podać linka do tych danych
+żeby ten wiedział skąd ma pobrać nowe dane!
