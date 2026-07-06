@@ -18,8 +18,9 @@ def find_actual_schedule():
     # 3. Iterate through all entries and find id of last actual entry
     # last actual entry - an entry which matches today's date
     last_actual_entry = data_range_sorter(today_for_mongo_str, all_entries)
+    connection.close()
     # 4. Return id of founded entry
-    return last_actual_entry[0]
+    return last_actual_entry[0] # it should return url from entry with status equals to active!
 
 """
 Last acutal entry - to wpis który pasuje do zamierzeń dzisiejsza data i przedziały tj.:

@@ -1,3 +1,4 @@
+"""Send message to SQS queue"""
 import json
 import os
 import uuid
@@ -7,54 +8,17 @@ from botocore.exceptions import ClientError, EndpointConnectionError
 import boto3
 from trash.log_logging import main_logger
 
-QUEUE_URL = os.getenv("QUEUE_URL")
-
-
-def message_creator(message_set: tuple):
-    """
-    Generate automate message for Amazon SQS
-    "param message_set: tuple from MESSAGE_SET global with parameters:
-        event_type = message_set[0]
-        worker = message_set[1]
-        change_type = message_set[2]
-        job = message_set[3]
-        location = message_set[4]
-    :return: message: dict - Ready SQS Message for AWS
-    """
-    # print(f"Debug in message_creator: {message_set}")
-    # print(type(message_set))
-    event_type = message_set[0]
-    worker = message_set[1]
-    change_type = message_set[2]
-    job = message_set[3]
-    location = message_set[4]
-    message = {
-            "event_id": str(uuid.uuid4()),
-            "event_type": event_type,
-            "source": "micro4_watcher",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": {
-                        "worker": worker,
-                        "changed_data": {
-                            "type": change_type,
-                            "action": job,
-                            "location": location
-                            }
-                        }
-            }
-    return message
-
-
-def send_event(message_set: dict):
+def send_message(message_set: dict):
     """
     Send event to SQS
     :param message_set: dict, ready by func message_creator dictionary with SQS message
-    :return:
+    :return: error_logs: list of error messages
     """
 
     # message_body = message_creator(message_set)
     message_body = message_set
-    sqs_attempts = 3
+    sqs_attempts = 5
+    error_logs = []
     # print("Debug: starting to send message to SQS")
     while sqs_attempts >= 0:
         try:
@@ -86,10 +50,11 @@ def send_event(message_set: dict):
             main_logger("info", f"New SQS message for {message_set} created. ID: "
                                 f"{response['MessageId']}")
             break
-        except EndpointConnectionError:
+        except EndpointConnectionError as no_con:
             main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
                                    f"No connection with SQS. "
                                    f"Attempts left: {sqs_attempts}")
+            error_logs.append(no_con)
         except ClientError as e:
             code = e.response['Error']['Code']
 
@@ -97,16 +62,20 @@ def send_event(message_set: dict):
                 main_logger("warning", f"Sending SQS message for {message_set[1]} failed."
                                        f"Access denied. "
                                        f"Attempts left: {sqs_attempts}")
+                error_logs.append(e)
             elif code == 'AWS.SimpleQueueService.NonExistentQueue':
                 main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
                                        f"No SQS queue. "
                                        f"Attempts left: {sqs_attempts}")
+                error_logs.append(e)
         except Exception as e:
             main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
                                    f"Unknown error: {e}. "
                                    f"Attempts left: {sqs_attempts}")
+            error_logs.append(e)
 
         sqs_attempts -= 1
 
     if sqs_attempts == 0:
         main_logger("error", f"SQS message for {message_set[1]} cannot be saved in SQS!")
+    return  error_logs

@@ -28,7 +28,7 @@ def receive_all_messages(worker: str):
         
         for message in batch:
             body = json.loads(message["Body"])
-            if body["payload"]["worker"] == worker:
+            if body["worker"] == worker:
                 messages.append(worker)
 
         if not batch:
