@@ -6,15 +6,16 @@ from datetime import datetime, timezone
 from botocore.exceptions import ClientError, EndpointConnectionError
 
 import boto3
-from trash.log_logging import main_logger
+from ztm_tools.logging.logger import main_logger
 
-def send_message(message_set: dict):
+def send_message(message_set: dict, queue: str):
     """
     Send event to SQS
     :param message_set: dict, ready by func message_creator dictionary with SQS message
+    :param queue: str, SQS queue name
     :return: error_logs: list of error messages
     """
-
+    main_logger("info", f"Debug: Queue: '{queue}' ({type(queue)})")
     # message_body = message_creator(message_set)
     message_body = message_set
     sqs_attempts = 5
@@ -42,16 +43,28 @@ def send_message(message_set: dict):
                 aws_secret_access_key="x"
             )
             # print("Debug: połączono z SQS")
-            response = sqs.send_message(
-                QueueUrl=os.getenv("S3_QUEUE_URL"),
-                MessageBody=json.dumps(message_body),
-            )
+            # response = sqs.list_queues()
+            # print(f"Debug: list_queues response: {response}")
+            if queue == "Events":
+                queue_url = sqs.get_queue_url(QueueName="events")["QueueUrl"]
+                response = sqs.send_message(
+                    QueueUrl=queue_url,
+                    MessageBody=json.dumps(message_body, default=str),
+                )
+            elif queue == "Status":
+                queue_url = sqs.get_queue_url(QueueName="status")["QueueUrl"]
+                response = sqs.send_message(
+                    QueueUrl=queue_url,
+                    MessageBody=json.dumps(message_body, default=str),
+                )
+            else:
+                raise ValueError("No valid queue name provided")
             # print(type(message_set))
             main_logger("info", f"New SQS message for {message_set} created. ID: "
                                 f"{response['MessageId']}")
             break
         except EndpointConnectionError as no_con:
-            main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
+            main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed. "
                                    f"No connection with SQS. "
                                    f"Attempts left: {sqs_attempts}")
             error_logs.append(no_con)
@@ -59,20 +72,21 @@ def send_message(message_set: dict):
             code = e.response['Error']['Code']
 
             if code == 'AccessDenied':
-                main_logger("warning", f"Sending SQS message for {message_set[1]} failed."
+                main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed."
                                        f"Access denied. "
                                        f"Attempts left: {sqs_attempts}")
                 error_logs.append(e)
             elif code == 'AWS.SimpleQueueService.NonExistentQueue':
-                main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
+                main_logger("warning", f"Sending SQS message for {message_set['task_id']}failed. "
                                        f"No SQS queue. "
                                        f"Attempts left: {sqs_attempts}")
                 error_logs.append(e)
         except Exception as e:
-            main_logger("warning", f"Sending SQS message for {message_set[1]} failed. "
+            main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed. "
                                    f"Unknown error: {e}. "
                                    f"Attempts left: {sqs_attempts}")
             error_logs.append(e)
+            main_logger("warning", f"{type(e).__name__}: {e!r}")
 
         sqs_attempts -= 1
 

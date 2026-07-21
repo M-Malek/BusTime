@@ -13,14 +13,28 @@ def find_actual_schedule():
     collection = connection["Poznan"]["Stop_times_arch"]
     # 2. Get all collection entries sorted descending by created_at with today's date
     today_for_mongo_str = datetime.strftime(datetime.now(), "%Y%m%d")
-    all_entries = collection.find_all()
+    #all_entries = collection.find({"state": "active"})
+    all_entries = collection.find({"state": "pending"})
     # print(all_entries)
-    # 3. Iterate through all entries and find id of last actual entry
+    # 3. Prepare data from all_entries to process by data_range_sorter:
+    all_entries_prepared = []
+    for entry in all_entries:
+        data_range = entry["file_name"].replace("_", "-")
+        all_entries_prepared.append((entry["_id"], data_range))
     # last actual entry - an entry which matches today's date
-    last_actual_entry = data_range_sorter(today_for_mongo_str, all_entries)
-    connection.close()
+    # connection.close()
+    print(all_entries_prepared)
+    last_actual_entry = data_range_sorter(today_for_mongo_str, all_entries_prepared)
     # 4. Return id of founded entry
-    return last_actual_entry[0] # it should return url from entry with status equals to active!
+    if last_actual_entry == ("noID", "noDatesRange"):
+        # There is no new schedule which should be active so this one with state = "active" is valid
+        winner = collection.find_one({"state": "active"})
+        result_winner = (winner["_id"], winner["file_name"])
+        return result_winner
+    else:
+        print(f"Debug: last actual entry {last_actual_entry[0]}")
+        #return last_actual_entry[0] # it should return tuple with id of entry closest to todays date
+        return last_actual_entry
 
 """
 Last acutal entry - to wpis który pasuje do zamierzeń dzisiejsza data i przedziały tj.:

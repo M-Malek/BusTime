@@ -1,5 +1,5 @@
 from botocore.exceptions import EndpointConnectionError, ClientError
-from trash.log_logging import main_logger
+from ztm_tools.logging.logger import main_logger
 import os
 
 
@@ -28,7 +28,7 @@ def s3_checker(client):
 
     except EndpointConnectionError:
         main_logger("error", "Endpoint Connection Error!")
-        return False
+        return "EndPoint Connection Error!"
     except ClientError as e:
         main_logger("error", f"Cannot check S3 status! Error: {e}")
-        return False
+        return e

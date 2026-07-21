@@ -53,7 +53,8 @@ def data_range_sorter(data: str, ranges: list):
         lowest_days_range = min(list(date_count.values()))
     except ValueError:
         # There is no range for this date
-        return tuple("noID", "noDatesRange")
+        result = ("noID", "noDatesRange")
+        return result
     # 3.3 Find all ranges with this value
     #print(lowest_days_range)
     for lowest_range in list(date_count.keys()):
@@ -61,7 +62,7 @@ def data_range_sorter(data: str, ranges: list):
         if date_count[lowest_range] == lowest_days_range:
             best_dates.append(lowest_range)
     # 3.4 Find range with the highest start date (first date in a row)
-    print(best_dates)
+    # print(best_dates)
     lowest_start_date = datetime.strptime(best_dates[0].split("-")[0], "%Y%m%d")
     winner_date_range = ""
     for date in best_dates:
@@ -75,9 +76,10 @@ def data_range_sorter(data: str, ranges: list):
     # I need to search these tuples for proper range
     # Return must return list with the smallest start date and the smallest timedelta
     ranges_by_data_range = {data_range: item for item, data_range in ranges}
-    print(ranges_by_data_range)
+    # print(ranges_by_data_range)
     # result_list = [entry for entry in ranges if datetime.strptime(entry[1].split("-")[0], "%Y%m%d") ==
     #                lowest_start_date]
     result_list = [entry for entry in ranges if entry[1] == winner_date_range]
+    #print(f"Result: {result_list[0]}")
     return result_list[0]
     # Function tested

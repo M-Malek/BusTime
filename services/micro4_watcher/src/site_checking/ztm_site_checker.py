@@ -40,7 +40,7 @@ from pymongo import MongoClient
 from src.site_checking.checksum_compare import checksum_compare
 from src.site_checking.mongo_entry_creator import entry_creator
 import os
-from site_checking.last_ztm_zip import last_ztm_zip
+from src.site_checking.last_ztm_zip import last_ztm_zip
 
 def ztm_site_checker():
 

@@ -5,7 +5,7 @@ from src.s3_checking.s3_connect import s3_connect
 from ztm_tools.logging.logger import main_logger
 from src.mongo_micro_tools.get_active_url import get_active_url
 
-async def create_message_schedules():
+def create_message_schedules():
     """
     Create message schedules
     :return: None, create message schedules in SQS queue and MongoDB collection
@@ -16,8 +16,8 @@ async def create_message_schedules():
         "url": actual_url
     }
     con = create_mongo_connection(getenv("MONGO_URI"))
-    task_collection = con["Poznan"]["events"]
-    sqs = s3_connect()
-    message_producer(task_collection, sqs, "m4", "m3", payload)
+    task_collection = con["Poznan"]["Events"]
+    sqs = s3_connect("S3_EVENTS_QUEUE")
+    message_producer(task_collection,  "m4", "m3", payload, "Events")
     main_logger("info", "Created message schedules")
 

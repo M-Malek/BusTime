@@ -1,9 +1,9 @@
 from boto3 import client
 from botocore.config import Config
-from trash.log_logging import main_logger
+from ztm_tools.logging.logger import main_logger
 import os
 
-def s3_connect():
+def s3_connect(endpoint="S3_BUCKET_ENDPOINT"):
     try:
         config = Config(
             connect_timeout=3,

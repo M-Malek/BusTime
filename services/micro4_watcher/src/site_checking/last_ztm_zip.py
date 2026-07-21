@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from site_checking.fetch_gfts_files import fetch_gtfs_files
+from src.site_checking.fetch_gfts_files import fetch_gtfs_files
 
 def last_ztm_zip():
     zip_files = fetch_gtfs_files()

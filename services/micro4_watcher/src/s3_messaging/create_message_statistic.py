@@ -13,7 +13,7 @@ def create_message_statistic():
         "task": "statistic"
     }
     con = create_mongo_connection(getenv("MONGO_URI"))
-    task_collection = con["Poznan"]["events"]
-    sqs = s3_connect()
-    message_producer(task_collection, sqs, "m4", "m3", payload)
+    task_collection = con["Poznan"]["Events"]
+    # sqs = s3_connect("S3_EVENTS_QUEUE")
+    message_producer(task_collection,  "m4", "m3", payload, "Events")
     main_logger("info", "Created message statistic")
