@@ -53,10 +53,19 @@ def message_creator(collection, source, worker, payload):
     :param payload: dict, custom message payload
     :return: None, creates message and insert it into MongoDb, then into SQS
     """
-    MESSAGE_SET["task_id"] = message_taks_id_creator(collection, source)
-    MESSAGE_SET["source"] = source
-    MESSAGE_SET["worker"] = worker
-    MESSAGE_SET["date"] = datetime.now()
-    MESSAGE_SET["status"] = "pending"
-    MESSAGE_SET["payload"] = payload
-    return MESSAGE_SET
+    message_set = {
+    "task_id": message_taks_id_creator(collection, source),
+    "source": source,
+    "worker": worker,
+    "date": datetime.now(),
+    "status": "pending",
+    "payload": payload
+    }
+    return message_set
+    # MESSAGE_SET["task_id"] = message_taks_id_creator(collection, source)
+    # MESSAGE_SET["source"] = source
+    # MESSAGE_SET["worker"] = worker
+    # MESSAGE_SET["date"] = datetime.now()
+    # MESSAGE_SET["status"] = "pending"
+    # MESSAGE_SET["payload"] = payload
+    # return MESSAGE_SET
