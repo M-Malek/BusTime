@@ -17,7 +17,8 @@ def create_message_schedules():
     }
     con = create_mongo_connection(getenv("MONGO_URI"))
     task_collection = con["Poznan"]["Events"]
-    sqs = s3_connect("S3_EVENTS_QUEUE")
-    message_producer(task_collection,  "m4", "m3", payload, "Events")
+    #sqs = s3_connect("S3_EVENTS_QUEUE")
+    message_producer(task_collection,  "m4", "m2", payload, "Events")
     main_logger("info", "Created message schedules")
+    con.close()
 

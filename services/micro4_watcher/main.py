@@ -50,8 +50,10 @@ def main_check_ztm_loop():
             # or entry with schedules for today has been modified
             # We need to create statistic and update data
             # Create message for statistic
+            print("Debug: sending message statistic!")
             create_message_statistic()
             # Create message for a new data
+            print("Debug: sending message schedules!")
             create_message_schedules()
         else:
             print("Debug: no new schedules on ZTM site")

@@ -17,3 +17,4 @@ def create_message_statistic():
     # sqs = s3_connect("S3_EVENTS_QUEUE")
     message_producer(task_collection,  "m4", "m3", payload, "Events")
     main_logger("info", "Created message statistic")
+    con.close()

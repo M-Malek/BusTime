@@ -1,5 +1,5 @@
 """ZTM messages consumer for ZTM Tools"""
-from boto3 import client
+import boto3
 import os
 import json
 
@@ -13,11 +13,16 @@ def receive_all_messages(worker: str):
             """
     
     messages = []
-    queue_url = os.getenv("SQS_QUEUE_URL")
-    
-    sqs = client("sqs")
+    sqs = boto3.client(
+        "sqs",
+        endpoint_url=os.getenv("S3_ENDPOINT"),
+        region_name="elasticmq",
+        aws_access_key_id="x",
+        aws_secret_access_key="x"
+    )
 
     while True:
+        queue_url = sqs.get_queue_url(QueueName="events")["QueueUrl"]
         response = sqs.receive_message(
             QueueUrl=queue_url,
             MaxNumberOfMessages=10,
@@ -39,11 +44,18 @@ def receive_all_messages(worker: str):
     return messages
 
 
-def delete_message(msg: dict):
+def delete_message(msg: dict, queue_name: str):
     """Deletes a mmessage from the SQS queue"""
     
     queue_url = os.getenv("SQS_QUEUE_URL")
-    sqs = client("sgs")
+    sqs = boto3.client(
+        "sqs",
+        endpoint_url=os.getenv("S3_ENDPOINT"),
+        region_name="elasticmq",
+        aws_access_key_id="x",
+        aws_secret_access_key="x"
+    )
+    queue_url = sqs.get_queue_url(QueueName=queue_name)["QueueUrl"]
     sqs.delete_message(
         QueueUrl = queue_url,
         ReceiptHandle = msg["ReceiptHandle"]

@@ -18,18 +18,23 @@ def message_producer(collection, source, worker, payload, queue):
     """
     message = message_creator(collection, source, worker, payload)
     var_create_job_in_history = job_message_inserter(collection, message)
-    print(f"Debug: {var_create_job_in_history}")
+    # print(f"Debug: {var_create_job_in_history}")
     if type(var_create_job_in_history) == list:
         # There were errors during saving job message in Events collection in MongoDB
-        main_logger("error", "Cannot save message in history. Sending message aboard")
+        main_logger("error", f"Cannot save message in history. Sending message aboard. Errors:"
+                             f" {var_create_job_in_history}")
     else:
         # Saving job message in Events collection in MongoDB accomplished
         var_send_job = send_message(message, queue)
-        print(f"Debug: {type(var_send_job)}")
+        #print(f"Debug: {type(var_send_job)}")
         # var_send_job = send_message(message, queue)
-        print(f"Debug: {type(var_send_job)}")
-        if type(var_send_job) is list:
+        # print(f"Debug: {type(var_send_job)}")
+        # print(f"Debug: {var_send_job}")
+        if len(var_send_job) > 0:
             # There were errors during saving job message to SQS
             main_logger("error", "Sending message to SQS failed.")
+            for error in var_send_job:
+                main_logger("error", f"Founded error: {error}")
         else:
-            main_logger("info", f"Message sent to SQS. Message ID in MongoDB: {var_send_job}")
+            main_logger("info", f"Message sent to SQS. Message ID in MongoDB: "
+                                f"{var_create_job_in_history}")

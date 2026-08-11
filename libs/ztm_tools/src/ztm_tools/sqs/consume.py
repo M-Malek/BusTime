@@ -17,8 +17,8 @@ def consume(worker: str, FUNCTION_MAP: dict):
     messages = receive_all_messages(worker)
     for message in messages:
         body = loads(message["Body"])
-
-        action = body["action"]
+        print(body)
+        """action = body["action"]
         args = body.get("args", {})
 
         function = FUNCTION_MAP.get(action)
@@ -29,7 +29,7 @@ def consume(worker: str, FUNCTION_MAP: dict):
             )
         function(**args)
         
-        delete_message(message)
+        delete_message(message)"""
 
 
 def test():

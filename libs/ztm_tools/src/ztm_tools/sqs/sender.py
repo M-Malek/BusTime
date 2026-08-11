@@ -51,45 +51,54 @@ def send_message(message_set: dict, queue: str):
                     QueueUrl=queue_url,
                     MessageBody=json.dumps(message_body, default=str),
                 )
+                print("Debug from send_message: Events: ", response["MessageId"])
             elif queue == "Status":
                 queue_url = sqs.get_queue_url(QueueName="status")["QueueUrl"]
                 response = sqs.send_message(
                     QueueUrl=queue_url,
                     MessageBody=json.dumps(message_body, default=str),
                 )
+                print("Debug from send_message: Status: ", response["MessageId"])
             else:
                 raise ValueError("No valid queue name provided")
             # print(type(message_set))
             main_logger("info", f"New SQS message for {message_set} created. ID: "
                                 f"{response['MessageId']}")
             break
-        except EndpointConnectionError as no_con:
-            main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed. "
+        except Exception as e:
+            if e == "EndpointConnectionError":
+                main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed. "
                                    f"No connection with SQS. "
                                    f"Attempts left: {sqs_attempts}")
-            error_logs.append(no_con)
-        except ClientError as e:
-            code = e.response['Error']['Code']
+                error_logs.append(e)
+            elif e == "ClientError":
+                code = e.response['Error']['Code']
 
-            if code == 'AccessDenied':
-                main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed."
+                if code == 'AccessDenied':
+                    main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed."
                                        f"Access denied. "
                                        f"Attempts left: {sqs_attempts}")
-                error_logs.append(e)
-            elif code == 'AWS.SimpleQueueService.NonExistentQueue':
-                main_logger("warning", f"Sending SQS message for {message_set['task_id']}failed. "
+                    error_logs.append(e)
+                elif code == 'AWS.SimpleQueueService.NonExistentQueue':
+                    main_logger("warning", f"Sending SQS message for {message_set['task_id']}failed. "
                                        f"No SQS queue. "
                                        f"Attempts left: {sqs_attempts}")
-                error_logs.append(e)
-        except Exception as e:
-            main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed. "
+                    error_logs.append(e)
+            else:
+                main_logger("warning", f"Sending SQS message for {message_set['task_id']} failed. "
                                    f"Unknown error: {e}. "
                                    f"Attempts left: {sqs_attempts}")
-            error_logs.append(e)
-            main_logger("warning", f"{type(e).__name__}: {e!r}")
+                error_logs.append(e)
+                main_logger("warning", f"{type(e).__name__}: {e!r}")
 
         sqs_attempts -= 1
 
     if sqs_attempts == 0:
         main_logger("error", f"SQS message for {message_set[1]} cannot be saved in SQS!")
     return  error_logs
+
+"""
+NIe działa numerowanie jak nie wysyłają się prawidłowo wiadomości do archiwum - jak się nie wyślą to i tak nie zadziała!
+NIe działa wykrywanie plików .ztm - aktualny wykrywa prawidłowo ale nadchodzący dostaje status 'archive' zamiast 
+'pending' - działa to wybiórczo
+"""
