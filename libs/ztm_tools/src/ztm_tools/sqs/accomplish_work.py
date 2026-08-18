@@ -8,7 +8,7 @@ from ztm_tools.logging.logger import main_logger
 def accomplish_all_works(worker, task_handler):
     """
     Recive and accomplish all works
-    :param worker:
+    :param worker: str, name of the worker
     :param task_handler: dict; pairs of tasks for given worker [task_krypto: function]
     :return: None
     """

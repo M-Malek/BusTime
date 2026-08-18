@@ -1,6 +1,6 @@
 """Send message to SQS queue"""
 import json
-import os
+from os import getenv
 import uuid
 from datetime import datetime, timezone
 from botocore.exceptions import ClientError, EndpointConnectionError
@@ -37,10 +37,10 @@ def send_message(message_set: dict, queue: str):
             """<--- ElasticMQ code section --->"""
             sqs = boto3.client(
                 "sqs",
-                endpoint_url=os.getenv("S3_ENDPOINT"),
-                region_name="elasticmq",
-                aws_access_key_id="x",
-                aws_secret_access_key="x"
+                endpoint_url=getenv("S3_ENDPOINT"),
+                region_name=getenv("SQS_REGION_NAME"),
+                aws_access_key_id=getenv("AWS_ACCESS_KEY_ID"),
+                aws_secret_access_key=getenv("AWS_SECRET_ACCESS_KEY")
             )
             # print("Debug: połączono z SQS")
             # response = sqs.list_queues()
