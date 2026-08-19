@@ -3,7 +3,7 @@ Handle errors related to task execution
 :author: @M-Malek
 """
 from ztm_tools.logging.logger import main_logger
-from json import dumps
+from json import dumps, loads
 from ztm_tools.mongo_tools import set_work_done_in_mongo
 
 def error_handler(sqs, message, error = None):
@@ -17,16 +17,16 @@ def error_handler(sqs, message, error = None):
     """
 
     # Read message id
-    task_id = message["task_id"]
-
+    task_id = loads(message['Body'])["task_id"]
+    body = loads(message['Body'])
     # Prepare message information
     status_message = {
         "task_id": task_id,
-        "source": message["source"],
-        "worker": message["worker"],
+        "source": body["source"],
+        "worker": body["worker"],
         "status": "failed",
         "error": str(error) if error else None,
-        "payload": message["payload"]
+        "payload": body["payload"]
     }
 
     # Read status and events queue urls

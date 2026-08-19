@@ -9,13 +9,18 @@ from ztm_tools.sqs.consume_old import test
 from src.message_checker import check_messages
 from ztm_tools.sqs.receive_messages import receive_all_messages, get_all_messages
 from ztm_tools.sqs.consume.consumer import message_consumer
+from datetime import datetime
 
 
 load_dotenv("config.env")
 
 # GLOBAL VARIABLES
+
+def tester():
+    print(f"Today: {datetime.today()}")
+
 FUNCTION_MAP = {
-    "statistic": print,
+    "statistic": tester,
 }
 
 

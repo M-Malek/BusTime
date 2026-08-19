@@ -8,6 +8,7 @@ from ztm_tools.sqs.consume.operation_decoder import operation_decoder
 from ztm_tools.sqs.consume.error_handler import error_handler
 from ztm_tools.mongo_tools.set_work_done_in_mongo import set_work_done_in_mongo
 from ztm_tools.logging.logger import main_logger
+from json import loads
 
 def message_consumer(worker, queue, function_map):
     """
@@ -19,17 +20,18 @@ def message_consumer(worker, queue, function_map):
     """
 
     # 1. Connect to SQS message queue
-    print("Debug: message_consumer is running")
+    #print("Debug: message_consumer is running")
     sqs = sqs_connector()
     queue_url = sqs.get_queue_url(QueueName=queue)["QueueUrl"]
-    print("Debug: SQS Queue URL: ", queue_url)
+    #print("Debug: SQS Queue URL: ", queue_url)
     while True:
         try:
             # 2. Read message to given worker
             message = sqs_message_reader(sqs, queue, worker)
-            print("Debug: SQS Message Read: ", message)
-            operation = message['payload']['task']
-            operation_payload = message['payload']
+            # print("Debug: SQS Message Read: ", message)
+            body = loads(message['Body'])
+            operation = body['payload']['task']
+            operation_payload = body['payload']
             # message_body = message["Body"]
             # receipt_handle = message["ReceiptHandle"]
             # message_id = message["MessageId"]
@@ -39,7 +41,7 @@ def message_consumer(worker, queue, function_map):
                 # Try to do an action
                 operation_status = operation_decoder(operation, function_map, operation_payload)
                 # 4. If work passed - change status, go next
-                print("Debug: Operation status: ", operation_status)
+                # print("Debug: Operation status: ", operation_status)
                 if operation_status:
                     main_logger("info", f"Operation: {operation}: success!")
                     set_work_done_in_mongo(message, "accomplished")
@@ -50,7 +52,7 @@ def message_consumer(worker, queue, function_map):
                     break
                 # 5. If work failed - error_handler
                 if attempt == 3:
-                    print("Debug: Error in operation: ", operation)
+                    # print("Debug: Error in operation: ", operation)
                     error_handler(message, operation, operation_payload)
         except StopIteration:
             break
