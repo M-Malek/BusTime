@@ -4,7 +4,7 @@ Handle errors related to task execution
 """
 from ztm_tools.logging.logger import main_logger
 from json import dumps, loads
-from ztm_tools.mongo_tools import set_work_done_in_mongo
+from ztm_tools.mongo_tools.set_work_done_in_mongo import set_work_done_in_mongo
 
 def error_handler(sqs, message, error = None):
     """
@@ -33,9 +33,9 @@ def error_handler(sqs, message, error = None):
     status_queue_url = sqs.get_queue_url(QueueName="status")["QueueUrl"]
     events_queue_url = sqs.get_queue_url(QueueName="events")["QueueUrl"]
 
-    # Give information to MongoDB that given task is failed
-    set_work_done_in_mongo(message, "failed")
     try:
+        # Give information to MongoDB that given task is failed
+        set_work_done_in_mongo(task_id, "failed", error if error else None)
         # 1. Send information about failed task to status queue
         sqs.send_message(
             QueueUrl=status_queue_url,

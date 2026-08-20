@@ -3,19 +3,20 @@ from ztm_tools.logging.logger import main_logger
 from json import loads
 from os import getenv
 
-def set_work_done_in_mongo(message, work_status):
+def set_work_done_in_mongo(task_id, work_status, error):
     """
     Set work as done in MongoDB collection "Events" as done
-    :param message: accomplished message
+    :param task_id: accomplished message
     :param work_status: work status
-    :return:
+    :param error: error message
+    :return: None
     """
     con = create_mongo_connection(getenv("MONGO_URI"))
     collection = con["Poznan"]["Events"]
-    task_id = loads(message['Body'])["task_id"]
-    result = collection.update_one({"task_id":task_id}, {"$set":{"status": work_status}})
+    result = collection.update_one({"task_id":task_id}, {"$set":{"status": work_status, 'error': error}})
+    print(f'Debug: result: {result}')
     if result.matched_count == 0:
-        main_logger("error", f"Cannot change status of task id: {message['task_id']} - task"
+        main_logger("error", f"Cannot change status of task id: {'task_id'} - task"
                              f"doesn't exist")
 
     con.close()

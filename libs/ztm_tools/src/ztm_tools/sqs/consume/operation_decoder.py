@@ -13,18 +13,18 @@ def operation_decoder(operation, function_map, operation_payload):
     :return: True if task accomplished, False otherwise
     """
     # 1. Delete parameter 'task' from operation_payload - 'task' is an operation!
-    # print(operation_payload)
-    # a = input('Holder: ')
-    payload = operation_payload.pop('task')
+    payload = operation_payload.copy()
+    payload.pop('task')
 
     function = function_map.get(operation)
     if function:
         try:
             #print(f"Debug: {operation}: {function}")
-            if len(operation_payload) == 0:
+            if len(payload) == 0:
                 function()
                 return True
             else:
+                print(f"Debug: working wit func with args. Args: {payload}")
                 function(**payload)
                 return True
         except Exception as e:

@@ -1,6 +1,10 @@
 """Tests for sqs_reader.py"""
 from ztm_tools.sqs.consume.reader import sqs_message_reader
 from ztm_tools.sqs.consume.connector import sqs_connector
+from os import environ
+
+# Load S3_ENDPOINT to .env variables from hand
+environ["S3_ENDPOINT"] = "" # delete after test / add to test!
 
 """
 Function sqs_message_reader works if their result is a Message with type dict
@@ -14,3 +18,5 @@ def test_sqs_message_reader():
     message2 = sqs_message_reader(sqs, 'events', 'm2')
     assert type(message2) == dict, "Message not a dictionary - error"
     print(message2)
+
+# Test passed!

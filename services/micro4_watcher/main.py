@@ -72,8 +72,8 @@ def main():
 
         # Only for tests:
         print("Debug: going to sleep")
-        time.sleep(120)
-        # FUNCTION READY FOR MAIN TEST
+        time.sleep(600)
+        # FUNCTION READY FOR MAIN TEST - up and running!
         """
         !!!!tutaj!!!!!
         Postaw Elastic na 2 kolejki,
