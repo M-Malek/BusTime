@@ -8,7 +8,7 @@ import os
 
 from botocore.exceptions import EndpointConnectionError, ClientError
 
-from trash.log_logging import main_logger
+from ztm_tools.logging.logger import main_logger
 
 
 # from shared.tools.env_os_variables import aws_zip_bucket_name, aws_zip_object_key

@@ -7,26 +7,28 @@ with all stop times informations
 # Import
 from src.zip_managing.zip_reader import ZIPReader
 # from services.micro2_timetables.src.zip_gather import zip_downloading
+from ztm_tools.models.stops import Stop
 
 
-class Stop:
-    def __init__(self, stop_id, stop_name, stop_lat, stop_lng, zone):
-        self.stop_id = stop_id
-        self.stop_name = stop_name
-        self. stop_lat = stop_lat
-        self.stop_lng = stop_lng
-        self.zone = zone
+# class Stop:
+#     def __init__(self, stop_id, stop_name, stop_lat, stop_lng, zone):
+#         self.stop_id = stop_id
+#         self.stop_name = stop_name
+#         self. stop_lat = stop_lat
+#         self.stop_lng = stop_lng
+#         self.zone = zone
+#
+#     def to_dict(self) -> dict:
+#         return {
+#             "stop_id": self.stop_id,
+#             "name": self.stop_name,
+#             "lat": self.stop_lat,
+#             "lng": self.stop_lng,
+#             "zone": self.zone
+#         }
 
-    def to_dict(self) -> dict:
-        return {
-            "stop_id": self.stop_id,
-            "name": self.stop_name,
-            "lat": self.stop_lat,
-            "lng": self.stop_lng,
-            "zone": self.zone
-        }
-
-
+# Dokończyć import stops, potem przepisać zip_parser na modele z klasy ztm_tools.
+# Potem zweryfikować, po czym można łączyć
 def zip_parser_stops(data: ZIPReader):
     """
     Parse zip file and prepare list of stops with their positions

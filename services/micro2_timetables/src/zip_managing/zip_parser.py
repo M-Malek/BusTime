@@ -180,6 +180,7 @@ def zip_parser(url_raw_data_set):
             trip_id = str(row.trip_id)
             shape_id = int(row.shape_id)
 
+            # Need rework to use here a class 'Route' from ztm_tools
             routes[trip_id] = {
                 "trip_id": trip_id,
                 "shape_id": shape_id,
@@ -191,6 +192,7 @@ def zip_parser(url_raw_data_set):
         vehicle_type = "tram" if int(line_info.route_type) == 0 else "bus"
 
         # --- Finalny zapis linii ---
+        # Need rework to use here a class 'Line' from ztm_tools
         ready_lines[line] = {
             "line_number": str(line),
             "type": vehicle_type,

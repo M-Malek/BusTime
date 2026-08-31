@@ -7,11 +7,11 @@ from src.zip_managing.zip_reader import ZIPReader
 from boto3 import client
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from trash.log_logging import main_logger
+from ztm_tools.logging.logger import main_logger
 from pymongo.errors import ConnectionFailure
 import os
 import json
-from trash.checksum_checker import checksum_checker
+#from trash.checksum_checker import checksum_checker
 from botocore.config import Config
 
 
@@ -31,9 +31,10 @@ def db_connector():
         counter -= 1
 
 
-def job_stops():
+def job_stops(url):
     """Load and save in MongoDB all stops data"""
-    source = zip_downloading(os.getenv("DC_ZIP_URL"))
+    # source = zip_downloading(os.getenv("DC_ZIP_URL"))
+    source = zip_downloading(url)
     data = ZIPReader(source)
     stops_data = zip_parser_stops(data)
 
@@ -76,27 +77,8 @@ def job_shapes():
         main_logger("warning", f"Micro2 job_shapes: falied to save shapes, error: {e}")
 
 
-def job_normal():
-    """Load and save to S3 all stoptimes data"""
-
-    # Check if it's necessary to download new data:
-    def status_describer(s3_object):
-        """
-        Describe logic for job_normal:
-        - if there is new file on ZTM server and S3 is empty - download new data - return logic 1
-        - if there is empty S3 - download new data - return logic 2
-        - if there is new file on ZTM server and S3 isn't empty - empty S3 and download new data - return logic 3
-        - if there isn't new file on ZTM server - skip - return logic 4
-        """
-        if checksum_checker() and s3_checker(s3_object):
-            return 1
-        elif s3_checker(s3_object):
-            return 2
-        elif checksum_checker() and not s3_checker(s3_object):
-            return 3
-        elif checksum_checker():
-            return 4
-
+def job_schedules(url):
+    """Main schedules action"""
     config = Config(
         connect_timeout=3,
         read_timeout=5,
@@ -109,25 +91,76 @@ def job_normal():
         aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
         config=config
     )
-    status = status_describer(s3)
-    match status:
-        case 1:
-            stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
-            save_data(s3, stoptimes_data)
-            main_logger("info", "Micro2 micro_jobs:job_normal - new.zip file and empty S3: new data saved!")
-        case 2:
-            stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
-            save_data(s3, stoptimes_data)
-            main_logger("info", "Micro2 micro_jobs:job_normal - empty S3: new data saved!")
-        case 3:
-            empty_s3(s3)
-            stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
-            save_data(s3, stoptimes_data)
-            main_logger("info", "Micro2 micro_jobs:job_normal - new .zip file: new data saved!")
-        case 4:
-            main_logger("info", "S3 has data and new .zip file hasn't been detected. New data hasn't been downloaded.")
-        case _:
-            main_logger("info", "Microservice 2 cannot identify, which action done.")
+    stoptimes_data = zip_parser(url)
+    save_data(s3, stoptimes_data)
+
+def job_empty():
+    config = Config(
+        connect_timeout=3,
+        read_timeout=5,
+        retries={'max_attempts': 3}
+    )
+    s3 = client(
+        "s3",
+        endpoint_url=os.getenv("S3_ENDPOINT"),
+        aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
+        aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+        config=config
+    )
+    empty_s3(s3)
+
+# def job_normal():
+#     """Load and save to S3 all stoptimes data"""
+#
+#     # Check if it's necessary to download new data:
+#     def status_describer(s3_object):
+#         """
+#         Describe logic for job_normal:
+#         - if there is new file on ZTM server and S3 is empty - download new data - return logic 1
+#         - if there is empty S3 - download new data - return logic 2
+#         - if there is new file on ZTM server and S3 isn't empty - empty S3 and download new data - return logic 3
+#         - if there isn't new file on ZTM server - skip - return logic 4
+#         """
+#         if checksum_checker() and s3_checker(s3_object):
+#             return 1
+#         elif s3_checker(s3_object):
+#             return 2
+#         elif checksum_checker() and not s3_checker(s3_object):
+#             return 3
+#         elif checksum_checker():
+#             return 4
+#
+#     config = Config(
+#         connect_timeout=3,
+#         read_timeout=5,
+#         retries={'max_attempts': 3}
+#     )
+#     s3 = client(
+#         "s3",
+#         endpoint_url=os.getenv("S3_ENDPOINT"),
+#         aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
+#         aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+#         config=config
+#     )
+#     status = status_describer(s3)
+#     match status:
+#         case 1:
+#             stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+#             save_data(s3, stoptimes_data)
+#             main_logger("info", "Micro2 micro_jobs:job_normal - new.zip file and empty S3: new data saved!")
+#         case 2:
+#             stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+#             save_data(s3, stoptimes_data)
+#             main_logger("info", "Micro2 micro_jobs:job_normal - empty S3: new data saved!")
+#         case 3:
+#             empty_s3(s3)
+#             stoptimes_data = zip_parser(os.getenv("DC_ZIP_URL"))
+#             save_data(s3, stoptimes_data)
+#             main_logger("info", "Micro2 micro_jobs:job_normal - new .zip file: new data saved!")
+#         case 4:
+#             main_logger("info", "S3 has data and new .zip file hasn't been detected. New data hasn't been downloaded.")
+#         case _:
+#             main_logger("info", "Microservice 2 cannot identify, which action done.")
 
     # if checksum_checker():
     #     # print("Debug: new data needs to be downloaded!")

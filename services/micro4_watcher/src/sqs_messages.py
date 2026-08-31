@@ -13,7 +13,7 @@ QUEUE_URL = os.getenv("QUEUE_URL")
 def message_creator(message_set: tuple):
     """
     Generate automate message for Amazon SQS
-    "param message_set: tuple from MESSAGE_SET global with parameters:
+    param message_set: tuple from MESSAGE_SET global with parameters:
         event_type = message_set[0]
         worker = message_set[1]
         change_type = message_set[2]

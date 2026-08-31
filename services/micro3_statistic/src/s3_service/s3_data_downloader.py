@@ -1,0 +1,36 @@
+from ztm_tools.s3_manager.download_data.file_downloader import download_data
+from ztm_tools.models.line import Line
+from ztm_tools.models.stop_time import StopTime
+
+def download_s3_data(line):
+    """
+    Download line data from S3
+    :param line: int, number of the line to download
+    :return: data for given line
+    """
+    raw_line_data = download_data(line)
+    examined_line = Line.from_dict(raw_line_data)
+    # print(examined_line.routes)
+    # for route_id, trip_data in examined_line.routes.items():
+    #     print(route_id)
+    #     print('Dane trasy:')
+    #     for single_route_data in trip_data.trip_data:
+    #         print(single_route_data.to_dict())
+    #
+    #     a = input('await')
+    return examined_line
+
+"""
+               line_number  type  agency  line_color                                             routes
+1_1691056^N+             7  tram       2        3594  {'trip_id': '1_1691056^N+', 'shape_id': 233136...
+1_1691066^N+             7  tram       2        3594  {'trip_id': '1_1691066^N+', 'shape_id': 233136...
+1_1691078^N+             7  tram       2        3594  {'trip_id': '1_1691078^N+', 'shape_id': 233136...
+1_1691082^N+             7  tram       2        3594  {'trip_id': '1_1691082^N+', 'shape_id': 233136...
+1_1691086^N+             7  tram       2        3594  {'trip_id': '1_1691086^N+', 'shape_id': 233136...
+...                    ...   ...     ...         ...                                                ...
+7_1686703^G,N            7  tram       2        3594  {'trip_id': '7_1686703^G,N', 'shape_id': 23231...
+7_1687850^G,N            7  tram       2        3594  {'trip_id': '7_1687850^G,N', 'shape_id': 23231...
+7_1687883^G,N            7  tram       2        3594  {'trip_id': '7_1687883^G,N', 'shape_id': 23231...
+7_1687920^G,N            7  tram       2        3594  {'trip_id': '7_1687920^G,N', 'shape_id': 23231...
+7_1688005^N,S            7  tram       2        3594  {'trip_id': '7_1688005^N,S', 'shape_id': 23231...
+"""

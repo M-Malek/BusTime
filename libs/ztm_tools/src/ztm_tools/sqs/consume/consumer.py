@@ -54,5 +54,8 @@ def message_consumer(worker, queue, function_map):
                 if attempt == 3:
                     # print("Debug: Error in operation: ", operation)
                     error_handler(message, operation, operation_payload)
+        except Exception:
+            main_logger('error', f'Cannot load message body for operation. Message: {message}')
+            continue
         except StopIteration:
             break
