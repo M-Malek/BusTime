@@ -40,7 +40,8 @@ def zip_parser_stops(data: ZIPReader):
     # raw_data_set = ZIPReader(raw_zip)
     all_unique_stops = data.stops["stop_id"].unique()
 
-    stops_cache = {}
+    # stops_cache = {}
+    stops_cache = []
     stops_data = data.stops
 
     for stop in stops_data.itertuples(index=False):
@@ -49,6 +50,7 @@ def zip_parser_stops(data: ZIPReader):
         #                   float(stop_data["stop_lon"]), str(stop_data["zone_id"]))
         new_stop = Stop(int(stop.stop_id), str(stop.stop_name), float(stop.stop_lat),
                         float(stop.stop_lon), str(stop.zone_id)).to_dict()
-        stops_cache[int(stop.stop_id)] = new_stop
+        #stops_cache[int(stop.stop_id)] = new_stop
+        stops_cache.append(new_stop)
 
     return stops_cache

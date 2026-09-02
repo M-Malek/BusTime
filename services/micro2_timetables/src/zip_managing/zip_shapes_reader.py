@@ -2,33 +2,32 @@
 Read shapes.txt and creat set of shapes data
 @M-Malek
 """
+from ztm_tools.models.shape import ReadyShape, Shape
 
-
-class ReadyShape:
-    def __init__(self, shape_id, shapes):
-        self.shape_id = shape_id
-        self.shapes = shapes
-
-    def to_dict(self) -> dict:
-        return {
-            "shape_id": self.shape_id,
-            "shapes": self.shapes
-        }
-
-
-class Shape:
-    def __init__(self, seq, lat, lon):
-        self.sequence = seq
-        self.latitude = lat
-        self.longitude = lon
-
-    def to_dict(self) -> dict:
-        return {
-            "sequence": self.sequence,
-            "latitude": self.latitude,
-            "longitude": self.longitude
-        }
-
+# class ReadyShape:
+#     def __init__(self, shape_id, shapes):
+#         self.shape_id = shape_id
+#         self.shapes = shapes
+#
+#     def to_dict(self) -> dict:
+#         return {
+#             "shape_id": self.shape_id,
+#             "shapes": self.shapes
+#         }
+#
+#
+# class Shape:
+#     def __init__(self, seq, lat, lon):
+#         self.sequence = seq
+#         self.latitude = lat
+#         self.longitude = lon
+#
+#     def to_dict(self) -> dict:
+#         return {
+#             "sequence": self.sequence,
+#             "latitude": self.latitude,
+#             "longitude": self.longitude
+#         }
 
 def shape_parser(zip_data):
     """

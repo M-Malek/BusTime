@@ -13,7 +13,7 @@ import os
 import json
 #from trash.checksum_checker import checksum_checker
 from botocore.config import Config
-
+from ztm_tools.mongo_tools.mongo_connect import create_mongo_connection
 
 def db_connector():
     # Function multiplied - to be moved to own lib
@@ -38,11 +38,14 @@ def job_stops(url):
     data = ZIPReader(source)
     stops_data = zip_parser_stops(data)
 
-    client = db_connector()
-    db_set = client["Poznan"]
+    # print("Debug:")
+    # print(stops_data)
+    con = create_mongo_connection(os.getenv("MONGO_URI"))
+    db_set = con["Poznan"]
     collection = db_set["Stops"]
     collection.drop()
-    collection.insert_many(stops_data.to_dict("records"))
+    collection.insert_many(stops_data)
+    con.close()
     main_logger("info", "Downloaded stops saved in MongoDB")
 
 
