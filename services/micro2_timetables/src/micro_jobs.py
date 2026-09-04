@@ -14,6 +14,8 @@ import json
 #from trash.checksum_checker import checksum_checker
 from botocore.config import Config
 from ztm_tools.mongo_tools.mongo_connect import create_mongo_connection
+from ztm_tools.s3_manager.s3_connect import s3_connect
+from ztm_tools.s3_manager.save_data.data_saver import save_data_in_bucket
 
 def db_connector():
     # Function multiplied - to be moved to own lib
@@ -51,33 +53,30 @@ def job_stops(url):
 
 def job_shapes():
     """Load and save to S3 all shapes data"""
-    s3 = client(
-        "s3",
-        endpoint_url=os.getenv("S3_ENDPOINT"),
-        aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
-        aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
-    )
 
     bucket_name = os.getenv("S3_BUCKET")
     bucket_prefix = "shapes"
+    source = zip_downloading(os.getenv("DC_ZIP_URL"))
+    data = ZIPReader(source)
 
-    # utworzenie bucket (jeśli nie istnieje)
-    try:
-        s3.create_bucket(Bucket=bucket_name)
-    except Exception as e:
-        main_logger("error", "micro_jobs.py: S3 bucket has been created earlier")
+    s3 = s3_connect()
+    a = input("wait")
 
-    shapes_data = shape_parser()  # stoped here!
-    file_key = f"{bucket_prefix}-shapes.json"
-    try:
-        s3.put_object(
-            Bucket=os.getenv("S3_BUCKET"),
-            Key=file_key,
-            Body=json.dumps(shapes_data, ensure_ascii=False).encode("utf-8"),
-            ContentType="application/json"
-        )
-    except Exception as e:
-        main_logger("warning", f"Micro2 job_shapes: falied to save shapes, error: {e}")
+    shapes_data = shape_parser(data)
+    # file_key = f"{bucket_prefix}-shapes.json"
+    for shape, shape_data in shapes_data.items():
+        save_data_in_bucket(s3, bucket_name, bucket_prefix, shape, shape_data)
+
+    s3.close()
+    # try:
+    #     s3.put_object(
+    #         Bucket=os.getenv("S3_BUCKET"),
+    #         Key=file_key,
+    #         Body=json.dumps(shapes_data, ensure_ascii=False).encode("utf-8"),
+    #         ContentType="application/json"
+    #     )
+    # except Exception as e:
+    #     main_logger("warning", f"Micro2 job_shapes: falied to save shapes, error: {e}")
 
 
 def job_schedules(url):

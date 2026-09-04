@@ -5,7 +5,7 @@ from time import sleep
 
 def s3_connect():
     attempts = 3
-    while attempts < 3:
+    while attempts > 0:
         try:
             s3 = client(
                 "s3",
@@ -18,5 +18,6 @@ def s3_connect():
             main_logger("error", f"Cannot connect to S3, error: {e}")
         attempts -= 1
         sleep(15)
-    main_logger("error", "Cannot connect to S3")
+    if attempts == 0:
+        main_logger("error", "Cannot connect to S3")
     return None
