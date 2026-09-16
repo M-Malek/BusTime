@@ -51,21 +51,26 @@ def job_stops(url):
     main_logger("info", "Downloaded stops saved in MongoDB")
 
 
-def job_shapes():
+def job_shapes(url):
     """Load and save to S3 all shapes data"""
 
     bucket_name = os.getenv("S3_BUCKET")
     bucket_prefix = "shapes"
     source = zip_downloading(os.getenv("DC_ZIP_URL"))
+    source = zip_downloading(url)
     data = ZIPReader(source)
 
     s3 = s3_connect()
-    a = input("wait")
+    #a = input("wait")
 
     shapes_data = shape_parser(data)
     # file_key = f"{bucket_prefix}-shapes.json"
     for shape, shape_data in shapes_data.items():
+        # print(shape)
+        # print("\n")
+        # print(shape_data)
         save_data_in_bucket(s3, bucket_name, bucket_prefix, shape, shape_data)
+        # a = input()
 
     s3.close()
     # try:

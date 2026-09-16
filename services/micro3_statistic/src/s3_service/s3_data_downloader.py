@@ -1,4 +1,4 @@
-from ztm_tools.s3_manager.download_data.file_downloader import download_data
+from ztm_tools.s3_manager.download_data.file_downloader import download_data_lines
 from ztm_tools.models.line import Line
 from ztm_tools.models.stop_time import StopTime
 
@@ -8,7 +8,7 @@ def download_s3_data(line):
     :param line: int, number of the line to download
     :return: data for given line
     """
-    raw_line_data = download_data(line)
+    raw_line_data = download_data_lines(line)
     examined_line = Line.from_dict(raw_line_data)
     # print(examined_line.routes)
     # for route_id, trip_data in examined_line.routes.items():

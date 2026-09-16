@@ -1,8 +1,8 @@
 class TripProgress:
-    def __init__(self, trip_id, route_id, vehicle_id, stops):
+    def __init__(self, trip_id, route_id, stops):
         self.trip_id = trip_id
         self.route_id = route_id
-        self.vehicle_id = vehicle_id
+        # self.vehicle_id = vehicle_id
 
         self.stops = stops
 
@@ -21,3 +21,26 @@ class TripProgress:
                 return stop
 
         return None
+
+    def to_dict(self) -> dict:
+        return {
+            "trip_id": self.trip_id,
+            "route_id": self.route_id,
+            "stops": self.stops,
+            "current_stop_seq": self.current_stop_seq,
+            "detected_stops": self.detected_stops,
+            "last_processed_timestamp": self.last_processed_timestamp,
+            "status": self.status,
+        }
+
+    @classmethod
+    def from_dict(cls, trip_dict):
+        return cls(
+            trip_dict["trip_id"],
+            trip_dict["route_id"],
+            trip_dict["stops"],
+            trip_dict["current_stop_seq"],
+            trip_dict["detected_stops"],
+            trip_dict["last_processed_timestamp"],
+            trip_dict["status"]
+        )

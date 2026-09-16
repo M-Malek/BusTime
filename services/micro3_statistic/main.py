@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from ztm_tools.sqs.consume.consumer import message_consumer
 from src.micro_jobs import job_statistic
 from datetime import datetime
-from ztm_tools.s3_manager.download_data.file_downloader import download_data
+from ztm_tools.s3_manager.download_data.file_downloader import download_data_lines
 from src.s3_service.s3_data_downloader import download_s3_data
 
 
