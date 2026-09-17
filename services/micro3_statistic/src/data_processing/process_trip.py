@@ -4,8 +4,8 @@ from ztm_tools.models.detect_stop import DetectedStop
 from ztm_tools.mongo_tools.mongo_connect import create_mongo_connection
 from ztm_tools.logging.logger import main_logger
 from ztm_tools.geolocation_tools.filter_points_on_route import filter_points_on_route
-from ztm_tools.geolocation_tools.haversine import haversine
-from math import abs
+from ztm_tools.geolocation_tools.haversine_method import haversine
+from src.mongo_service.take_mongo_data import take_mongo_data
 from os import getenv
 
 def process_trip(trip, schedules_df):
@@ -21,18 +21,10 @@ def process_trip(trip, schedules_df):
 
     # Check if exist model TripProgress with shape_id
     # If it doesn't exist - create it
-    con = create_mongo_connection(getenv("MONGO_URI"))
-    col = con['Poznan']['Line_info']
     trip_id = trip["trip_id"].unique()[0]
-    if col.find_one({"trip_id": trip_id}):
-        processing = col.find_one({"shape_id": trip_id})
-        current_trip = TripProgress.from_dict(processing)
-    else:
-        current_trip = TripProgress(
-            trip_id,
-            trip.loc[trip["trip_id"] == trip_id, "route_id"].iloc[0],
-            None)
-    con.close()
+    route_id = trip.loc[trip["trip_id"] == trip_id, "route_id"].iloc[0]
+    current_trip = take_mongo_data(trip_id, route_id)
+
     # In try-except: search for given by Vehicles data trip_id - if found, do calculations
     try:
         # Take one examined trip from line data
@@ -52,20 +44,21 @@ def process_trip(trip, schedules_df):
                     # Point in range 5 meters, to accept
                     # Calculate delay
                     delay = abs(filtered_points["timestamp"] - examined_schedule["arrival_time"])
+                    print(delay)
                     # Create DetectStop object
-                    new_mes_stop = DetectedStop(
+                    # new_mes_stop = DetectedStop(
+                    #
+                    # )
+                    # current_trip.detected_stops.append(new_mes_stop)
 
-                    )
-                    current_trip.detected_stops.append(new_mes_stop)
+        # Save information's to MongoDB
+        updated_trip = take_mongo_data(trip_id, route_id, current_trip)
+        return updated_trip
 
-    # Save informations to MongoDB
-    con = create_mongo_connection(getenv("MONGO_URI"))
-    col = con["Poznan"]["Line_info"]
-    col.update_one() # end line here, rework check Mongo as separate function
-    return current_trip
     except KeyError:
         main_logger("error", f"Cannot identify trip_id: {trip_id} "
                             f"for line {schedules_df.line_number} ")
+
 
     """
     Example of data from MongoDB

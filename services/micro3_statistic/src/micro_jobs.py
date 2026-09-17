@@ -47,7 +47,7 @@ def job_statistic():
             # Process trip
             processed_trip = process_trip(trip, schedules_df)
             # Calculate statistic data
-            calculations = calculate_statistic()
+            calculations = calculate_statistic("data")
             # Save calculations result
             save_calculations(calculations)
             # print(trip)
