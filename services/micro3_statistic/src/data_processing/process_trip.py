@@ -4,6 +4,8 @@ from ztm_tools.models.detect_stop import DetectedStop
 from ztm_tools.mongo_tools.mongo_connect import create_mongo_connection
 from ztm_tools.logging.logger import main_logger
 from ztm_tools.geolocation_tools.filter_points_on_route import filter_points_on_route
+from ztm_tools.geolocation_tools.haversine import haversine
+from math import abs
 from os import getenv
 
 def process_trip(trip, schedules_df):
@@ -30,7 +32,7 @@ def process_trip(trip, schedules_df):
             trip_id,
             trip.loc[trip["trip_id"] == trip_id, "route_id"].iloc[0],
             None)
-
+    con.close()
     # In try-except: search for given by Vehicles data trip_id - if found, do calculations
     try:
         # Take one examined trip from line data
@@ -43,7 +45,24 @@ def process_trip(trip, schedules_df):
         print(filtered_points)
         # We have filtered points which belong to route
         # Now, compare it with stops locations part by part to examine, if vehicle reached stop
-        
+        for point in filtered_points:
+            for scheduled_point in examined_schedule:
+                distance_between_points = haversine(point["lat"], point["lng"], scheduled_point["lat"], scheduled_point["lng"]) < 5
+                if distance_between_points <= 5:
+                    # Point in range 5 meters, to accept
+                    # Calculate delay
+                    delay = abs(filtered_points["timestamp"] - examined_schedule["arrival_time"])
+                    # Create DetectStop object
+                    new_mes_stop = DetectedStop(
+
+                    )
+                    current_trip.detected_stops.append(new_mes_stop)
+
+    # Save informations to MongoDB
+    con = create_mongo_connection(getenv("MONGO_URI"))
+    col = con["Poznan"]["Line_info"]
+    col.update_one() # end line here, rework check Mongo as separate function
+    return current_trip
     except KeyError:
         main_logger("error", f"Cannot identify trip_id: {trip_id} "
                             f"for line {schedules_df.line_number} ")

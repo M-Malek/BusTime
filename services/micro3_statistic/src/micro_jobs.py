@@ -7,6 +7,8 @@ from src.mongo_service.vehicle_location_importer import vehicles_data_downloader
 from src.mongo_service.vehicles_data_organizer import organize_vehicles_data
 from src.s3_service.s3_data_downloader import download_s3_data
 from src.data_processing.process_trip import process_trip
+from src.data_processing.calculate_statistic import calculate_statistic
+from src.mongo_service.save_calculations import save_calculations
 #  Remember: after downloading data from ZTM Micro 3 has to give info to Micro 2 - replace data!
 def job_statistic():
     """
@@ -42,7 +44,12 @@ def job_statistic():
         # schedules_df has all information from .json file. Now it's simple: compare data from Mongo and .json files
         # gdzie shape? w jsonie! teraz znajdź trip w json i wtedy wyciągaj id shape i odpowiedni shape!
         for trip in organized_vehicles_trips:
-            process_trip(trip, schedules_df)
+            # Process trip
+            processed_trip = process_trip(trip, schedules_df)
+            # Calculate statistic data
+            calculations = calculate_statistic()
+            # Save calculations result
+            save_calculations(calculations)
             # print(trip)
             # if trip in schedules_df.routes.items():
             #     print("Znaleziono trasę: ", trip)
