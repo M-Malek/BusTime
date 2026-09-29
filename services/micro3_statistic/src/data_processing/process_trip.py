@@ -7,6 +7,7 @@ from ztm_tools.geolocation_tools.filter_points_on_route import filter_points_on_
 from ztm_tools.geolocation_tools.haversine_method import haversine
 from src.mongo_service.take_mongo_data import take_mongo_data
 from os import getenv
+from ztm_tools.mongo_tools.statistic_tools.collect_stop_position import collect_stop_position
 
 def process_trip(trip, schedules_df):
     """
@@ -30,34 +31,51 @@ def process_trip(trip, schedules_df):
         # Take one examined trip from line data
         examined_schedule = schedules_df.routes[trip_id]
         # Download shape data from S3
-        shape_data = download_data_shapes(examined_schedule.shape_id)
+        shape_data = download_data_shapes(examined_schedule["shape_id"])
         # The applications accept all measurements, which geolocation distance between the point and
         # next shape point is less or equal 5 meters
-        filtered_points = filter_points_on_route(trip, shape_data)
-        print(filtered_points)
+        try:
+            filtered_points = filter_points_on_route(trip, shape_data)
+        except Exception as e:
+            print(f"Error w filtered; {e}")
         # We have filtered points which belong to route
         # Now, compare it with stops locations part by part to examine, if vehicle reached stop
-        for point in filtered_points:
-            for scheduled_point in examined_schedule:
-                distance_between_points = haversine(point["lat"], point["lng"], scheduled_point["lat"], scheduled_point["lng"]) < 5
-                if distance_between_points <= 5:
-                    # Point in range 5 meters, to accept
-                    # Calculate delay
-                    delay = abs(filtered_points["timestamp"] - examined_schedule["arrival_time"])
-                    print(delay)
-                    # Create DetectStop object
-                    # new_mes_stop = DetectedStop(
-                    #
-                    # )
-                    # current_trip.detected_stops.append(new_mes_stop)
+        # only for debug:
+        updated_trip = []
+        if len(filtered_points.index) != 0:
+            for _, point in filtered_points.iterrows():
+
+                for scheduled_point in examined_schedule["trip_data"]:
+                    # scheduled_point is now a dictionary with information about trip with parameters:
+                    # {'seq', 'stop_id', 'arv_time', 'dep_time', 'pickup', 'dropoff'}
+                    # Now it's necessary to find stop_id coordinates
+                    stop_lat, stop_lng = collect_stop_position(scheduled_point["stop_id"])
+                    if stop_lat is not None and stop_lng is not None:
+                        distance_between_points = haversine(point["lat"], point["lng"], stop_lat, stop_lng)
+                        if distance_between_points <= 5:
+                            print(f"For point {point['lat']}, {point['lng']}, we have stop {scheduled_point['stop_id']}({stop_lat}, {stop_lng})"
+                                  f"in range of 5 meters! Adding to delay calculations!")
+                            # Point in range 5 meters, to accept
+                            # Calculate delay
+                            delay = abs(filtered_points["timestamp"] - examined_schedule["arrival_time"])
+                            print(delay)
+                            updated_trip.append([
+                                point,
+                                delay
+                            ])
+                            # Create DetectStop object
+                            # new_mes_stop = DetectedStop(
+                            #
+                            # )
+                            # current_trip.detected_stops.append(new_mes_stop)
 
         # Save information's to MongoDB
-        updated_trip = take_mongo_data(trip_id, route_id, current_trip)
+        # updated_trip = take_mongo_data(trip_id, route_id, current_trip)
         return updated_trip
 
-    except KeyError:
+    except KeyError as e:
         main_logger("error", f"Cannot identify trip_id: {trip_id} "
-                            f"for line {schedules_df.line_number} ")
+                            f"for line {schedules_df['line_number'].unique()[0]}. Error: {e} ")
 
 
     """
