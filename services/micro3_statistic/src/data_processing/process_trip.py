@@ -43,26 +43,43 @@ def process_trip(trip, schedules_df):
         # only for debug:
         updated_trip = []
         if len(filtered_points.index) != 0:
-            for _, point in filtered_points.iterrows():
+            # Download data of stops:
+            stops = {}
+            for scheduled_point in examined_schedule["trip_data"]:
+                stops[scheduled_point["stop_id"]] = collect_stop_position([scheduled_point["stop_id"]])
 
+            for _, point in filtered_points.iterrows():
                 for scheduled_point in examined_schedule["trip_data"]:
+                    # print(scheduled_point)
+                    # c = input("wait...")
                     # scheduled_point is now a dictionary with information about trip with parameters:
                     # {'seq', 'stop_id', 'arv_time', 'dep_time', 'pickup', 'dropoff'}
                     # Now it's necessary to find stop_id coordinates
-                    stop_lat, stop_lng = collect_stop_position(scheduled_point["stop_id"])
+                    # stop_lat, stop_lng = collect_stop_position(scheduled_point["stop_id"])
+                    stop_lat = stops[scheduled_point["stop_id"]][0]
+                    stop_lng = stops[scheduled_point["stop_id"]][1]
                     if stop_lat is not None and stop_lng is not None:
+                        print(point["lat"], point["lng"], stop_lat, stop_lng)
                         distance_between_points = haversine(point["lat"], point["lng"], stop_lat, stop_lng)
-                        if distance_between_points <= 5:
-                            print(f"For point {point['lat']}, {point['lng']}, we have stop {scheduled_point['stop_id']}({stop_lat}, {stop_lng})"
-                                  f"in range of 5 meters! Adding to delay calculations!")
-                            # Point in range 5 meters, to accept
-                            # Calculate delay
-                            delay = abs(filtered_points["timestamp"] - examined_schedule["arrival_time"])
-                            print(delay)
-                            updated_trip.append([
-                                point,
-                                delay
-                            ])
+                        print("Distance between points: ", distance_between_points)
+                        b = input('wait...')
+                        # ERROR HERE!
+                        # Distance between points is huge: 52.39297866821289 16.88636016845703 52.38342 16.8345 -> more
+                        # than 3 kilometers! Check:
+                        # 1. If examined_schedule and shape_data are data for the same schedule
+                        # 2. Check if rounding data by MongDB does not destroy them
+                        # 3. Check idea!
+                    #     if distance_between_points <= 5:
+                    #         print(f"For point {point['lat']}, {point['lng']}, we have stop {scheduled_point['stop_id']}({stop_lat}, {stop_lng})"
+                    #               f"in range of 5 meters! Adding to delay calculations!")
+                    #         # Point in range 5 meters, to accept
+                    #         # Calculate delay
+                    #         delay = abs(filtered_points["timestamp"] - examined_schedule["arrival_time"])
+                    #         print(delay)
+                    #         updated_trip.append([
+                    #             point,
+                    #             delay
+                    #         ])
                             # Create DetectStop object
                             # new_mes_stop = DetectedStop(
                             #
