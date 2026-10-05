@@ -18,81 +18,136 @@ def process_trip(trip, schedules_df):
     """
     line_id = trip[0]
     trip = trip[1]
-    # print(trip["trip_id"].unique())
 
     # Check if exist model TripProgress with shape_id
     # If it doesn't exist - create it
     trip_id = trip["trip_id"].unique()[0]
     route_id = trip.loc[trip["trip_id"] == trip_id, "route_id"].iloc[0]
     current_trip = take_mongo_data(trip_id, route_id)
-
-    # In try-except: search for given by Vehicles data trip_id - if found, do calculations
+    # print("Current trip_id: ", trip_id)
+    # print("Current route_id: ", route_id)
+    # a = input("wait")
+    # Step 1: load all necessary data:
+    # Prepare reference trip data from .zip files - it is theoretical vehicle route
     try:
-        # Take one examined trip from line data
         examined_schedule = schedules_df.routes[trip_id]
-        # Download shape data from S3
-        shape_data = download_data_shapes(examined_schedule["shape_id"])
-        # The applications accept all measurements, which geolocation distance between the point and
-        # next shape point is less or equal 5 meters
-        try:
-            filtered_points = filter_points_on_route(trip, shape_data)
-        except Exception as e:
-            print(f"Error w filtered; {e}")
-        # We have filtered points which belong to route
-        # Now, compare it with stops locations part by part to examine, if vehicle reached stop
-        # only for debug:
-        updated_trip = []
-        if len(filtered_points.index) != 0:
-            # Download data of stops:
-            stops = {}
-            for scheduled_point in examined_schedule["trip_data"]:
-                stops[scheduled_point["stop_id"]] = collect_stop_position([scheduled_point["stop_id"]])
-
-            for _, point in filtered_points.iterrows():
-                for scheduled_point in examined_schedule["trip_data"]:
-                    # print(scheduled_point)
-                    # c = input("wait...")
-                    # scheduled_point is now a dictionary with information about trip with parameters:
-                    # {'seq', 'stop_id', 'arv_time', 'dep_time', 'pickup', 'dropoff'}
-                    # Now it's necessary to find stop_id coordinates
-                    # stop_lat, stop_lng = collect_stop_position(scheduled_point["stop_id"])
-                    stop_lat = stops[scheduled_point["stop_id"]][0]
-                    stop_lng = stops[scheduled_point["stop_id"]][1]
-                    if stop_lat is not None and stop_lng is not None:
-                        print(point["lat"], point["lng"], stop_lat, stop_lng)
-                        distance_between_points = haversine(point["lat"], point["lng"], stop_lat, stop_lng)
-                        print("Distance between points: ", distance_between_points)
-                        b = input('wait...')
-                        # ERROR HERE!
-                        # Distance between points is huge: 52.39297866821289 16.88636016845703 52.38342 16.8345 -> more
-                        # than 3 kilometers! Check:
-                        # 1. If examined_schedule and shape_data are data for the same schedule
-                        # 2. Check if rounding data by MongDB does not destroy them
-                        # 3. Check idea!
-                    #     if distance_between_points <= 5:
-                    #         print(f"For point {point['lat']}, {point['lng']}, we have stop {scheduled_point['stop_id']}({stop_lat}, {stop_lng})"
-                    #               f"in range of 5 meters! Adding to delay calculations!")
-                    #         # Point in range 5 meters, to accept
-                    #         # Calculate delay
-                    #         delay = abs(filtered_points["timestamp"] - examined_schedule["arrival_time"])
-                    #         print(delay)
-                    #         updated_trip.append([
-                    #             point,
-                    #             delay
-                    #         ])
-                            # Create DetectStop object
-                            # new_mes_stop = DetectedStop(
-                            #
-                            # )
-                            # current_trip.detected_stops.append(new_mes_stop)
-
-        # Save information's to MongoDB
-        # updated_trip = take_mongo_data(trip_id, route_id, current_trip)
-        return updated_trip
-
     except KeyError as e:
-        main_logger("error", f"Cannot identify trip_id: {trip_id} "
-                            f"for line {schedules_df['line_number'].unique()[0]}. Error: {e} ")
+        main_logger("error", f"Cannot identify trip_id: {trip_id}")
+        return None
+
+    # Load stops data - schedules_df contains only stop_id for our route - we need to load stops locations first
+    stops = {}
+    for scheduled_point in examined_schedule["trip_data"]:
+        stops[scheduled_point["stop_id"]] = collect_stop_position([scheduled_point["stop_id"]])
+
+    # Try to find shape data - if it doesn't exist we cannot check if points are on vehicle road - this data
+    # cannot be accepted - return None and skip this route
+    try:
+        shape_data = download_data_shapes(examined_schedule["shape_id"])
+    except Exception as e:
+        main_logger("info", f"There is no shape data for trip_id: {trip_id}")
+        return None
+
+    # Step 2: finding measurement points:
+    # Find all points belongs to vehicle route - if there was an error or there were no points, return None
+    try:
+        filtered_points = filter_points_on_route(trip, shape_data)
+    except Exception as e:
+        main_logger("error", f"Error while filtering points on route: trip_id: {line_id}")
+        return None
+
+    if len(filtered_points.index) == 0:
+        main_logger("error", f"There was no points which belongs to trip_id: {trip_id}")
+        return None
+
+    # Step 3: calculations
+    # First, let's check if we have sequence data - it's easiest way to check data
+    # print("----------------Filtered points-----------")
+    # print(filtered_points)
+    # print("---------------------------")
+    # print(type(filtered_points))
+    if filtered_points["seq"].isna().any():
+        # Filtered_points has None or NaN - we need to compare all points with reference points
+        pass
+    else:
+        # Filtered_points has sequence data - we need to check some first and last points and calculate
+        pass
+
+    # d = input()
+    # In try-except: search for given by Vehicles data trip_id - if found, find all points for given route
+    # try:
+    #     # Take one examined trip from line data
+    #     examined_schedule = schedules_df.routes[trip_id]
+    #     # Download shape data from S3
+    #     shape_data = download_data_shapes(examined_schedule["shape_id"])
+    #     # The applications accept all measurements, which geolocation distance between the point and
+    #     # next shape point is less or equal 5 meters
+    #
+    #     # Find positions of all stops on Vehicle route
+    #     try:
+    #         filtered_points = filter_points_on_route(trip, shape_data)
+    #     except Exception as e:
+    #         main_logger("error", f"Error while filtering points on route: line: {line_id}")
+    #
+    #     # We have filtered points which belong to route
+    #     # Now, compare it with stops locations part by part to examine, if vehicle reached stop
+    #     # only for debug:
+    #     updated_trip = []
+    #
+    #     # If len(filtered_points.index) > 0 -> that's mean that we have some points which belongs to route
+    #     if len(filtered_points.index) != 0:
+    #         # Download data of stops:
+    #         stops = {}
+    #         for scheduled_point in examined_schedule["trip_data"]:
+    #             stops[scheduled_point["stop_id"]] = collect_stop_position([scheduled_point["stop_id"]])
+    #
+    #
+    #
+    #         for _, point in filtered_points.iterrows():
+    #             for scheduled_point in examined_schedule["trip_data"]:
+    #                 # print(scheduled_point)
+    #                 # c = input("wait...")
+    #                 # scheduled_point is now a dictionary with information about trip with parameters:
+    #                 # {'seq', 'stop_id', 'arv_time', 'dep_time', 'pickup', 'dropoff'}
+    #                 # Now it's necessary to find stop_id coordinates
+    #                 # stop_lat, stop_lng = collect_stop_position(scheduled_point["stop_id"])
+    #                 stop_lat = stops[scheduled_point["stop_id"]][0]
+    #                 stop_lng = stops[scheduled_point["stop_id"]][1]
+    #                 if stop_lat is not None and stop_lng is not None:
+    #                     print(point["lat"], point["lng"], stop_lat, stop_lng)
+    #                     distance_between_points = haversine(point["lat"], point["lng"], stop_lat, stop_lng)
+    #                     print("Distance between points: ", distance_between_points)
+    #                     b = input('wait...')
+    #                     # ERROR HERE!
+    #                     # Distance between points is huge: 52.39297866821289 16.88636016845703 52.38342 16.8345 -> more
+    #                     # than 3 kilometers! Check:
+    #                     # 1. If examined_schedule and shape_data are data for the same schedule
+    #                     # 2. Check if rounding data by MongDB does not destroy them
+    #                     # 3. Check idea!
+    #                 #     if distance_between_points <= 5:
+    #                 #         print(f"For point {point['lat']}, {point['lng']}, we have stop {scheduled_point['stop_id']}({stop_lat}, {stop_lng})"
+    #                 #               f"in range of 5 meters! Adding to delay calculations!")
+    #                 #         # Point in range 5 meters, to accept
+    #                 #         # Calculate delay
+    #                 #         delay = abs(filtered_points["timestamp"] - examined_schedule["arrival_time"])
+    #                 #         print(delay)
+    #                 #         updated_trip.append([
+    #                 #             point,
+    #                 #             delay
+    #                 #         ])
+    #                         # Create DetectStop object
+    #                         # new_mes_stop = DetectedStop(
+    #                         #
+    #                         # )
+    #                         # current_trip.detected_stops.append(new_mes_stop)
+    #
+    #     # Save information's to MongoDB
+    #     # updated_trip = take_mongo_data(trip_id, route_id, current_trip)
+    #     return updated_trip
+    #
+    # except KeyError as e:
+    #     main_logger("error", f"Cannot identify trip_id: {trip_id} "
+    #                         f"for line {schedules_df['line_number'].unique()[0]}. Error: {e} ")
 
 
     """

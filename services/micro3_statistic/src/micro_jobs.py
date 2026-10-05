@@ -45,9 +45,9 @@ def job_statistic():
         #schedules_df = download_s3_data(line_number)
         schedules_df = download_data_lines(line_number)
         # schedules_df has all information from .json file. Now it's simple: compare data from Mongo and .json files
-        # gdzie shape? w jsonie! teraz znajdź trip w json i wtedy wyciągaj id shape i odpowiedni shape!
         for trip in organized_vehicles_trips:
             # Process trip
+            # print(f"Przekazuje do analizy trip: {trip}")
             processed_trip = process_trip(trip, schedules_df)
             # Calculate statistic data
             calculations = calculate_statistic("data")
