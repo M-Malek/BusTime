@@ -3,6 +3,7 @@ class DetectedStop:
         detection_method):
         self.stop_id = stop_id
         self.seq = seq
+        self.observations = []
 
         self.scheduled_arrival = scheduled_arrival
         self.scheduled_departure = scheduled_departure
@@ -17,6 +18,7 @@ class DetectedStop:
         return {
             "stop_id": self.stop_id,
             "seq": self.seq,
+            "observations": self.observations,
 
             "scheduled_arrival": self.scheduled_arrival,
             "scheduled_departure": self.scheduled_departure,
@@ -33,6 +35,7 @@ class DetectedStop:
         return cls(
             stop_id=data["stop_id"],
             seq=data["seq"],
+            observations=data["observations"],
             scheduled_arrival=data["scheduled_arrival"],
             scheduled_departure=data["scheduled_departure"],
             detected_time=data["detected_time"],

@@ -6,6 +6,7 @@ from ztm_tools.logging.logger import main_logger
 from ztm_tools.geolocation_tools.filter_points_on_route import filter_points_on_route
 from ztm_tools.geolocation_tools.haversine_method import haversine
 from src.mongo_service.take_mongo_data import take_mongo_data
+from ztm_tools.geolocation_tools.find_observations_near_stop import find_observations_near_stops
 from os import getenv
 from ztm_tools.mongo_tools.statistic_tools.collect_stop_position import collect_stop_position
 
@@ -61,17 +62,54 @@ def process_trip(trip, schedules_df):
         return None
 
     # Step 3: calculations
-    # First, let's check if we have sequence data - it's easiest way to check data
-    # print("----------------Filtered points-----------")
-    # print(filtered_points)
-    # print("---------------------------")
-    # print(type(filtered_points))
-    if filtered_points["seq"].isna().any():
-        # Filtered_points has None or NaN - we need to compare all points with reference points
-        pass
-    else:
-        # Filtered_points has sequence data - we need to check some first and last points and calculate
-        pass
+    # Calculate, which points from filtered_points are close to stop, add them as observations of detected stops
+    observation_points = find_observations_near_stops(filtered_points, examined_schedule["trip_data"])
+    # Debug:
+    print("----Founded points----")
+    for observation_point in observation_points:
+        print(observation_point.to_dict())
+    print("--------------")
+
+    # # First, let's check if we have sequence data - it's easiest way to check data
+    # # print("----------------Filtered points-----------")
+    # # print(filtered_points)
+    # # print("---------------------------")
+    # # print(type(filtered_points))
+    # if filtered_points["seq"].isna().any():
+    #     # Filtered_points has None or NaN - we need to compare all points with reference points
+    #     print(examined_schedule["trip_data"])
+    #     pass
+    # else:
+    #     # Filtered_points has sequence data - we need to check some first and last points and calculate
+    #     print(examined_schedule["trip_data"])
+    #     pass
+
+    """
+    examined_schedule["trip_data"]:
+    [{'seq': 0, 'stop_id': 1701, 'arv_time': '18:06:00', 'dep_time': '18:06:00', 'pickup': 0, 'dropoff': 1}, 
+    {'seq': 1, 'stop_id': 1698, 'arv_time': '18:07:00', 'dep_time': '18:07:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 2, 'stop_id': 1700, 'arv_time': '18:08:00', 'dep_time': '18:08:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 3, 'stop_id': 1694, 'arv_time': '18:09:00', 'dep_time': '18:09:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 4, 'stop_id': 1695, 'arv_time': '18:10:00', 'dep_time': '18:10:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 5, 'stop_id': 81, 'arv_time': '18:11:00', 'dep_time': '18:11:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 6, 'stop_id': 79, 'arv_time': '18:12:00', 'dep_time': '18:12:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 7, 'stop_id': 77, 'arv_time': '18:13:00', 'dep_time': '18:13:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 8, 'stop_id': 76, 'arv_time': '18:14:00', 'dep_time': '18:14:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 9, 'stop_id': 73, 'arv_time': '18:16:00', 'dep_time': '18:16:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 10, 'stop_id': 71, 'arv_time': '18:18:00', 'dep_time': '18:18:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 11, 'stop_id': 102, 'arv_time': '18:20:00', 'dep_time': '18:20:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 12, 'stop_id': 99, 'arv_time': '18:22:00', 'dep_time': '18:22:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 13, 'stop_id': 94, 'arv_time': '18:24:00', 'dep_time': '18:24:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 14, 'stop_id': 103, 'arv_time': '18:26:00', 'dep_time': '18:26:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 15, 'stop_id': 105, 'arv_time': '18:28:00', 'dep_time': '18:28:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 16, 'stop_id': 187, 'arv_time': '18:29:00', 'dep_time': '18:29:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 17, 'stop_id': 183, 'arv_time': '18:30:00', 'dep_time': '18:30:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 18, 'stop_id': 235, 'arv_time': '18:32:00', 'dep_time': '18:32:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 19, 'stop_id': 231, 'arv_time': '18:33:00', 'dep_time': '18:33:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 20, 'stop_id': 194, 'arv_time': '18:34:00', 'dep_time': '18:34:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 21, 'stop_id': 197, 'arv_time': '18:36:00', 'dep_time': '18:36:00', 'pickup': 0, 'dropoff': 0}, 
+    {'seq': 22, 'stop_id': 199, 'arv_time': '18:37:00', 'dep_time': '18:37:00', 'pickup': 1, 'dropoff': 0}]
+    """
 
     # d = input()
     # In try-except: search for given by Vehicles data trip_id - if found, find all points for given route

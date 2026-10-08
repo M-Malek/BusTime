@@ -10,10 +10,10 @@ def filter_points_on_route(gather_data, reference_data, max_distance=5):
     :param max_distance: maximum acceptable distance between points in meters, default value: 5
     :return: DataFrame with filtered data
     """
-    print("Gather data:")
-    print(gather_data)
-    print("Reference data:")
-    print(reference_data)
+    # print("Gather data:")
+    # print(gather_data)
+    # print("Reference data:")
+    # print(reference_data)
     b = input()
     # Recalculate reference data to x, y cords
     reference_x, reference_y = lat_lng_to_meters(reference_data["latitude"].to_numpy(), reference_data["longitude"].to_numpy())
