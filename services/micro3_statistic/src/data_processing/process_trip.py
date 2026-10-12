@@ -9,6 +9,7 @@ from src.mongo_service.take_mongo_data import take_mongo_data
 from ztm_tools.geolocation_tools.find_observations_near_stop import find_observations_near_stops
 from os import getenv
 from ztm_tools.mongo_tools.statistic_tools.collect_stop_position import collect_stop_position
+from ztm_tools.models.detected_observation import DetectedObservation
 
 def process_trip(trip, schedules_df):
     """
@@ -64,11 +65,26 @@ def process_trip(trip, schedules_df):
     # Step 3: calculations
     # Calculate, which points from filtered_points are close to stop, add them as observations of detected stops
     observation_points = find_observations_near_stops(filtered_points, examined_schedule["trip_data"])
-    # Debug:
-    print("----Founded points----")
-    for observation_point in observation_points:
-        print(observation_point.to_dict())
-    print("--------------")
+
+    # Step 4:
+    # Add information to current_trip
+    # Prepare list of stops_id to save as list:
+    stop_id_list = list(stops.keys())
+
+    # Add stops to trip information, if stops is empty
+    print(current_trip)
+    if current_trip.stops is None:
+        current_trip.stops = stop_id_list
+    elif len(current_trip.stops) == 0:
+        current_trip.stops = stop_id_list
+    current_trip.detected_stops.append(observation_points)
+    saved_data = take_mongo_data(trip_id, route_id, current_trip)
+    main_logger("info", f"Saved data for trip: {saved_data.trip_id}")
+    # # Debug:
+    # print("----Founded points----")
+    # for observation_point in observation_points:
+    #     print(observation_point.to_dict())
+    # print("--------------")
 
     # # First, let's check if we have sequence data - it's easiest way to check data
     # # print("----------------Filtered points-----------")

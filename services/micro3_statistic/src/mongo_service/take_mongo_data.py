@@ -18,9 +18,9 @@ def take_mongo_data(trip_id, route_id, data_object=None):
         con = create_mongo_connection(getenv("MONGO_URI"))
         col = con['Poznan']['Line_info']
         if col.find_one({"trip_id": trip_id}):
-            col.update_one({"trip_id": trip_id}, {"$set": data_object}, upsert=False)
+            col.update_one({"trip_id": trip_id}, {"$set": data_object.to_dict()}, upsert=False)
         else:
-            col.insert_one(data_object)
+            col.insert_one(data_object.to_dict())
         con.close()
         return data_object
     else:

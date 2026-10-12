@@ -54,7 +54,7 @@ def find_observations_near_stops(filtered_points, trip_data, max_distance_m=30):
                     lng=point["lng"],
                     observation_time=point["timestamp"],
                     distance_to_point=distance_m,
-                )
+                ).to_dict()
             )
 
     return observations
