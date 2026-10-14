@@ -64,7 +64,7 @@ FUNCTION_MAP = {
 
 def main():
     #message_consumer("m2", "Events", FUNCTION_MAP)
-    #job_schedules("https://www.ztm.poznan.pl/pl/dla-deweloperow/getGTFSFile/?file=20260908_20260930.zip")
+    #job_schedules("https://www.ztm.poznan.pl/pl/dla-deweloperow/getGTFSFile/?file=20261010_20261031.zip")
     job_shapes("https://www.ztm.poznan.pl/pl/dla-deweloperow/getGTFSFile/?file=20260908_20260930.zip")
 
 if __name__ == "__main__":

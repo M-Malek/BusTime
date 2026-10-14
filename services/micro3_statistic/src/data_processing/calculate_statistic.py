@@ -1,3 +1,3 @@
-def calculate_statistic(data):
+def calculate_statistic():
     pass
     
