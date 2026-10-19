@@ -1,8 +1,12 @@
 class TripProgress:
-    def __init__(self, trip_id, route_id, stops):
+    def __init__(self, trip_id, route_id, stops, current_stop_seq, detected_stops, last_processed_timestamp, status):
         self.trip_id = trip_id
         self.route_id = route_id
         # self.vehicle_id = vehicle_id
+        self.current_stop_seq = current_stop_seq
+        self.detected_stops = detected_stops
+        self.last_processed_timestamp = last_processed_timestamp
+        self.status = status
 
         self.stops = stops
 

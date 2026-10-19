@@ -30,12 +30,16 @@ def save_data_in_bucket(s3, bucket_name, bucket_prefix, file_name, data):
     while connection_counter <= 4:
         try:
             file_key = f"{bucket_prefix}/{file_name}.json"
-            s3.put_object(
+            response = s3.put_object(
                 Bucket=getenv("S3_BUCKET"),
                 Key=file_key,
                 Body=dumps(data, ensure_ascii=False).encode("utf-8"),
                 ContentType="application/json"
             )
+
+            main_logger("info", f"File: {file_name}.json saved HTTP status:"
+                                f"{response['ResponseMetadata']['HTTPStatusCode']}")
+
             return str(file_name)
         except Exception as e:
             main_logger("warning", f"Attempt {connection_counter} to save data with name "

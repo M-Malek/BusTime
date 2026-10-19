@@ -36,9 +36,11 @@ def process_trip(trip, schedules_df):
 
     # Try to find shape data - if it doesn't exist we cannot check if points are on vehicle road - this data
     # cannot be accepted - return None and skip this route
+    # print("Debug: ", examined_schedule["shape_id"])
     try:
         shape_data = download_data_shapes(examined_schedule["shape_id"])
     except Exception as e:
+        main_logger("error", f"Error while downloading shapes: {e}")
         main_logger("info", f"There is no shape data for trip_id: {trip_id}")
         return None
 

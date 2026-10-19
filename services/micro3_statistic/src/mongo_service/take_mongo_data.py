@@ -27,13 +27,20 @@ def take_mongo_data(trip_id, route_id, data_object=None):
         # data_object is None so function will download data:
         con = create_mongo_connection(getenv("MONGO_URI"))
         col = con['Poznan']['Line_info']
-        if col.find_one({"trip_id": trip_id}):
-            processing = col.find_one({"shape_id": trip_id})
+
+        processing = col.find_one({"trip_id": trip_id})
+        if processing:
             current_trip = TripProgress.from_dict(processing)
         else:
-            current_trip = TripProgress(
-                trip_id,
-                route_id,
-                None)
+            current_trip = TripProgress(trip_id, route_id, None, None, None, None, "In progress")
+
+        # if col.find_one({"trip_id": trip_id}):
+        #     processing = col.find_one({"shape_id": trip_id})
+        #     current_trip = TripProgress.from_dict(processing)
+        # else:
+        #     current_trip = TripProgress(
+        #         trip_id,
+        #         route_id,
+        #         None)
         con.close()
         return current_trip
