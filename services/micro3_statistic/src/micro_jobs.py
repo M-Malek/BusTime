@@ -52,7 +52,7 @@ def job_statistic():
         processed_trip = process_trip(trip, schedules_df)
 
         if processed_trip is not None:
-            calculations = calculate_statistic(processed_trip)
+            calculations = calculate_statistic(processed_trip, schedules_df)
             save_calculations(calculations)
 
     for vehicle in vehicles:

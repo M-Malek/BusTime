@@ -2,12 +2,12 @@ from ztm_tools.geolocation_tools.lat_lng_to_meters import lat_lng_to_meters
 from numpy import column_stack
 from scipy.spatial import cKDTree
 
-def filter_points_on_route(gather_data, reference_data, max_distance=5):
+def filter_points_on_route(gather_data, reference_data, max_distance=20):
     """
     Filter points which belongs to Vehicle route
     :param gather_data: data gathered from moving Vehicle - data from MongoDB collection Vehicles
     :param reference_data: referenced data - data from S3 bucket shapes from ZTM .zip file: shapes.txt
-    :param max_distance: maximum acceptable distance between points in meters, default value: 5
+    :param max_distance: maximum acceptable distance between points in meters, default value: 20 meters
     :return: DataFrame with filtered data
     """
     # print("Gather data:")
