@@ -1,0 +1,7 @@
+Things to todo or rework:
+1. filter_points_on_map and find_observations_near_stop - observations distances as env variables,
+2. Clean code of microservice 2,
+3. Microservice 2 - add clearing shapes bucket to s3_empty,
+4. Microservice 2 - create two new sets of functions in funciton map:
+job_download - clear S3 and download new data - call s3_empty then job_stops and job_shapes
+5. Migrate Microservices 2 to ztm_tools lib - done
