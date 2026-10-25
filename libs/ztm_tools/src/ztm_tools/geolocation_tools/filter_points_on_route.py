@@ -44,4 +44,3 @@ def filter_points_on_route(gather_data, reference_data, max_distance=5):
 
     return accepted_coordinates_df
 
-

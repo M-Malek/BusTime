@@ -49,7 +49,9 @@ def process_trip(trip, schedules_df):
     try:
         filtered_points = filter_points_on_route(trip, shape_data)
     except Exception as e:
-        main_logger("error", f"Error while filtering points on route: trip_id: {line_id}")
+        main_logger("error", f"Error while filtering points on route: "
+                             f"line_id: {line_id}, trip_id: {trip_id} \n"
+                             f"Error: {e}")
         return None
 
     if len(filtered_points.index) == 0:
@@ -58,7 +60,7 @@ def process_trip(trip, schedules_df):
 
     # Step 3: calculations
     # Calculate, which points from filtered_points are close to stop, add them as observations of detected stops
-    observation_points = find_observations_near_stops(filtered_points, examined_schedule["trip_data"])
+    observation_points = find_observations_near_stops(filtered_points, examined_schedule["trip_data"], stops)
 
     # Step 4:
     # Add information to current_trip

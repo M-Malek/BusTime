@@ -8,30 +8,31 @@ import datetime
 # from services.micro2_timetables.src.zip_gather import zip_downloading
 from src.zip_managing.zip_reader import ZIPReader
 from src.zip_managing.zip_gather import zip_downloading
+from ztm_tools.models.stop_time import StopTime
 
 
 import pandas as pd
 from pandas import merge
 
 
-class StopTime:
-    def __init__(self, stop_id, arv_time, dep_time, seq, pickup, dropoff):
-        self.stop_id = stop_id
-        self.arv_time = arv_time
-        self.dep_time = dep_time
-        self.seq = seq
-        self.pickup = pickup
-        self.dropoff = dropoff
-
-    def to_dict(self) -> dict:
-        return {
-            "seq": self.seq,
-            "stop_id": self.stop_id,
-            "arv_time": self.arv_time,
-            "dep_time": self.dep_time,
-            "pickup": self.pickup,
-            "dropoff": self.dropoff
-        }
+# class StopTime:
+#     def __init__(self, stop_id, arv_time, dep_time, seq, pickup, dropoff):
+#         self.stop_id = stop_id
+#         self.arv_time = arv_time
+#         self.dep_time = dep_time
+#         self.seq = seq
+#         self.pickup = pickup
+#         self.dropoff = dropoff
+#
+#     def to_dict(self) -> dict:
+#         return {
+#             "seq": self.seq,
+#             "stop_id": self.stop_id,
+#             "arv_time": self.arv_time,
+#             "dep_time": self.dep_time,
+#             "pickup": self.pickup,
+#             "dropoff": self.dropoff
+#         }
 
 
 class Shape:
