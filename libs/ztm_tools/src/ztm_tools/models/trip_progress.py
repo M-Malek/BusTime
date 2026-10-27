@@ -9,6 +9,8 @@ class TripProgress:
         self.status = status
 
         self.stops = stops
+        self.all_stops_count = len(stops or [])
+        self.accomplished_stops_count = 0
 
         self.current_stop_seq = None
         self.detected_stops = []
@@ -31,6 +33,8 @@ class TripProgress:
             "trip_id": self.trip_id,
             "route_id": self.route_id,
             "stops": self.stops,
+            "all_stops_count": self.all_stops_count,
+            "accomplished_stops_count": self.accomplished_stops_count,
             "current_stop_seq": self.current_stop_seq,
             "detected_stops": self.detected_stops,
             "last_processed_timestamp": self.last_processed_timestamp,
