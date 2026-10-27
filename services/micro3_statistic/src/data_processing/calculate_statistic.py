@@ -1,4 +1,5 @@
 from pandas import DataFrame as df
+from datetime import datetime, timedelta
 
 def calculate_statistic(current_trip, schedules_df):
     """
@@ -15,21 +16,70 @@ def calculate_statistic(current_trip, schedules_df):
     # print("Trip_id: " + current_trip.trip_id + " route_id: " + current_trip.route_id)
     # print(schedules_df)
     # print(detected_stops)
+    # Find information about last examined stop:
     last_detected_stop = None
     last_detected_stop_time = None
 
+    # If current_trip.last_processed_timestamp it's first run for given trip
     if current_trip.last_processed_timestamp is not None:
-        last_detected_stop_time = current_trip.current_stop_seq
+        last_detected_stop_time = current_trip.last_processed_timestamp
 
+    # The same as above:
     if last_detected_stop_time is not None:
-        last_detected_stop = current_trip.last
+        last_detected_stop = current_trip.current_stop_seq
+
     # Iterate through detected stops in detected_stops
     for stop in detected_stops:
         # Take id of detected stop
         trip_stop_id = stop["referenced_stop_id"]
-        # Find trip_stop_id in current_schedule:
-        schedule_for_trip_stop_id = current_schedule
+        # Take sequence number of detected stop:
+        trip_sequence = stop["sequence"]
+        # Find the scheduled stop matching both its sequence and stop id:
+        schedule_for_trip_stop_id = next(
+            (
+                scheduled_stop
+                for scheduled_stop in current_schedule
+                if scheduled_stop["seq"] == trip_sequence
+                and scheduled_stop["stop_id"] == trip_stop_id
+            ),
+            None,
+        )
+        stop_completed = False
+        stop_delay = None
+        if schedule_for_trip_stop_id is not None:
+            observation_time = stop["observation_time"]
+            observation_datetime = (
+                observation_time.to_pydatetime()
+                if hasattr(observation_time, "to_pydatetime")
+                else observation_time
+            )
+            scheduled_date = observation_datetime.date()
+            arv_time = datetime.strptime(
+                schedule_for_trip_stop_id["arv_time"], "%H:%M:%S"
+            ).time()
+            dep_time = datetime.strptime(
+                schedule_for_trip_stop_id["dep_time"], "%H:%M:%S"
+            ).time()
+            arv_datetime = datetime.combine(scheduled_date, arv_time)
+            dep_datetime = datetime.combine(scheduled_date, dep_time)
+            if dep_datetime < arv_datetime:
+                dep_datetime += timedelta(days=1)
+
+            window_start = arv_datetime + timedelta(minutes=3)
+            window_end = dep_datetime - timedelta(minutes=2)
+            if observation_datetime < window_start - timedelta(hours=12):
+                observation_datetime += timedelta(days=1)
+            elif observation_datetime > window_end + timedelta(hours=12):
+                observation_datetime -= timedelta(days=1)
+
+            stop_completed = window_start <= observation_datetime <= window_end
+            if not stop_completed:
+                stop_delay = max(timedelta(0), observation_datetime - window_end)
+
         print(schedule_for_trip_stop_id)
+        print(f"Czy przystanek zaliczony w czasie?: {str(stop_completed)}. "
+              f"Opóźnienie: {int(stop_delay.total_seconds()) if stop_delay is not None else 'b.d.'} min")
+        print(stop_delay)
         print(stop)
     # print(current_trip.to_dict())
 
