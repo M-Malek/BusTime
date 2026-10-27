@@ -9,7 +9,7 @@
 from src.data_sender import save_vehicles
 from src.feeds_collector import feeds_manager
 from src.data_sender import db_data_wipeout
-from trash.log_logging import main_logger
+from src.log_logging import main_logger
 import os
 
 

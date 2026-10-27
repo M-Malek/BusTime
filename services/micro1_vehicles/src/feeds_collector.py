@@ -10,7 +10,7 @@ from pandas import DataFrame
 import datetime
 
 from src.download_vehicle_data import download_vehicle_data
-from trash.log_logging import main_logger
+from src.log_logging import main_logger
 
 
 def feeds_manager(url_vehicle, url_feeds):
@@ -87,7 +87,8 @@ def feeds_manager(url_vehicle, url_feeds):
 
         data_feeds_raw.append({
             "id": entity.id,
-            "trip_id": trip_update.trip.route_id,
+            "trip_id": trip_update.trip.trip_id,
+            "route_id": trip_update.trip.route_id,
             "seq": first_stu.stop_sequence,
             "delay": first_stu.arrival.delay if first_stu.HasField("arrival") else None,
             "timestamp": datetime.datetime.fromtimestamp(trip_update.timestamp),
@@ -127,9 +128,9 @@ def feeds_manager(url_vehicle, url_feeds):
         # print(feed) - feed is None!
         # Select required data and save as ready set
         combined_entry = {
-            "id": vehicle["id"] if vehicle else None,
+            "id": vehicle["id"] if vehicle else (feed["id"] if feed else None),
             "trip_id": trip_id,
-            "route_id": vehicle["route_id"] if vehicle else (feed["trip_id"] if feed else None),
+            "route_id": vehicle["route_id"] if vehicle else (feed["route_id"] if feed else None),
             "lat": vehicle["lat"] if vehicle else None,
             "lng": vehicle["lng"] if vehicle else None,
             "timestamp": vehicle["timestamp"] if vehicle else (feed["timestamp"] if feed else None),

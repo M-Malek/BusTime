@@ -3,7 +3,7 @@ Download feed files for next processing
 Creator: M-Malek
 """
 import google
-from trash.log_logging import main_logger
+from src.log_logging import main_logger
 
 # GLOBALS:
 

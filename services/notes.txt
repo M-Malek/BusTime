@@ -54,3 +54,14 @@ Jak to ma działać:
 Wiadomości SQS w payload muszą zawierać szczegółowe ale krótkie informacje o tym, co ma zrobić dany mikroserwis
 czyli np. Micro 3 wysyłając informacje dla micro 2, że są nowe dane, musi mu podać linka do tych danych
 żeby ten wiedział skąd ma pobrać nowe dane!
+
+Repaired errors:
+27.10.2026 - Microservice 1 - critical error:
+Kod powodował rozdział danych:
+gdy pobierano dane lat i lng to nie pobierał danych seq i delay i na odwrót,
+Główna przyczyna jest w łączeniu rekordów z vehicle.pb i feeds.pb:
+w feeds_collector.py jako trip_id z feeds.pb pobierane jest route_id.
+vehicle.pb używa pola trip_id, więc mapy zwykle nie dopasują tych rekordów.
+W rezultacie powstają osobne dokumenty: jedne z lat/lng i pustymi seq/delay, drugie z seq/delay i pustymi lat/lng.
+
+Naprawiono przez edycję pliku feeds_collector.py. Błędy znalezione i wyeliminowane przez ChatGPT, wersja 6.0 Luna.
