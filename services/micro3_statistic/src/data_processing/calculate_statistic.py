@@ -28,6 +28,9 @@ def calculate_statistic(current_trip, schedules_df):
     if last_detected_stop_time is not None:
         last_detected_stop = current_trip.current_stop_seq
 
+    # Sort detected_stops by time of measurment
+    detected_stops = sorted(detected_stops, key=lambda x: x["observation_time"])
+
     # Iterate through detected stops in detected_stops
     for stop in detected_stops:
         # Take id of detected stop
@@ -76,12 +79,36 @@ def calculate_statistic(current_trip, schedules_df):
             if not stop_completed:
                 stop_delay = max(timedelta(0), observation_datetime - window_end)
 
-        print(schedule_for_trip_stop_id)
-        print(f"Czy przystanek zaliczony w czasie?: {str(stop_completed)}. "
-              f"Opóźnienie: {int(stop_delay.total_seconds()) if stop_delay is not None else 'b.d.'} min")
-        print(stop_delay)
-        print(stop)
-    # print(current_trip.to_dict())
+            # Add delay to DetectedStop Object
+            stop['delay'] = stop_delay
+        # Debug:
+        # print(schedule_for_trip_stop_id)
+        # print(f"Czy przystanek zaliczony w czasie?: {str(stop_completed)}. "
+        #       f"Opóźnienie: {int(stop_delay.total_seconds()) if stop_delay is not None else 'b.d.'} min")
+        # print(stop)
+        # print(stop_delay)
+        # print(stop)
+
+    # Update data in current_trip object of TripProgress class:
+    # Update detected_stops by delay between points:
+    current_trip.detected_stops[0] = detected_stops
+
+    # Update information about last stop:
+    last_detected_stop_time = detected_stops[0]['observation_time']
+    current_trip.last_processed_timestamp = last_detected_stop_time
+    last_detected_stop = detected_stops[0]['stop_id']
+    current_trip.current_stop_seq = last_detected_stop
+
+    # Update trip progress:
+    current_trip.status = f"IN PROGRESS: {len(detected_stops)}/{current_trip.all_stops_count}"
+
+    # Check if vehicle trip is over if last_detected_stop count is last item of all_stops_count
+    if last_detected_stop == current_schedule[-1]:
+        current_trip.status = "COMPLETED"
+
+    # Debug:
+    print(current_trip.to_dict())
+    return current_trip
 
 """
 [{'seq': 0, 'stop_id': 221, 'arv_time': '06:49:00', 'dep_time': '06:49:00', 'pickup': 0, 'dropoff': 1}, {'seq': 1, 'stop_id': 219, 'arv_time': '06:50:00', 'dep_time': '06:50:00', 'pickup': 0, 'dropoff': 0}, {'seq': 2, 'stop_id': 218, 'arv_time': '06:51:00', 'dep_time': '06:51:00', 'pickup': 0, 'dropoff': 0}, {'seq': 3, 'stop_id': 216, 'arv_time': '06:52:00', 'dep_time': '06:52:00', 'pickup': 0, 'dropoff': 0}, {'seq': 4, 'stop_id': 214, 'arv_time': '06:53:00', 'dep_time': '06:53:00', 'pickup': 0, 'dropoff': 0}, {'seq': 5, 'stop_id': 209, 'arv_time': '06:55:00', 'dep_time': '06:55:00', 'pickup': 0, 'dropoff': 0}, {'seq': 6, 'stop_id': 207, 'arv_time': '06:56:00', 'dep_time': '06:56:00', 'pickup': 0, 'dropoff': 0}, {'seq': 7, 'stop_id': 205, 'arv_time': '06:57:00', 'dep_time': '06:57:00', 'pickup': 0, 'dropoff': 0}, {'seq': 8, 'stop_id': 203, 'arv_time': '06:58:00', 'dep_time': '06:58:00', 'pickup': 0, 'dropoff': 0}, {'seq': 9, 'stop_id': 3804, 'arv_time': '06:59:00', 'dep_time': '06:59:00', 'pickup': 0, 'dropoff': 0}, {'seq': 10, 'stop_id': 202, 'arv_time': '07:00:00', 'dep_time': '07:00:00', 'pickup': 0, 'dropoff': 0}, {'seq': 11, 'stop_id': 238, 'arv_time': '07:02:00', 'dep_time': '07:02:00', 'pickup': 0, 'dropoff': 0}, {'seq': 12, 'stop_id': 236, 'arv_time': '07:03:00', 'dep_time': '07:03:00', 'pickup': 0, 'dropoff': 0}, {'seq': 13, 'stop_id': 184, 'arv_time': '07:04:00', 'dep_time': '07:04:00', 'pickup': 0, 'dropoff': 0}, {'seq': 14, 'stop_id': 188, 'arv_time': '07:06:00', 'dep_time': '07:06:00', 'pickup': 0, 'dropoff': 0}, {'seq': 15, 'stop_id': 106, 'arv_time': '07:07:00', 'dep_time': '07:07:00', 'pickup': 0, 'dropoff': 0}, {'seq': 16, 'stop_id': 104, 'arv_time': '07:09:00', 'dep_time': '07:09:00', 'pickup': 0, 'dropoff': 0}, {'seq': 17, 'stop_id': 95, 'arv_time': '07:11:00', 'dep_time': '07:11:00', 'pickup': 0, 'dropoff': 0}, {'seq': 18, 'stop_id': 100, 'arv_time': '07:13:00', 'dep_time': '07:13:00', 'pickup': 0, 'dropoff': 0}, {'seq': 19, 'stop_id': 101, 'arv_time': '07:15:00', 'dep_time': '07:15:00', 'pickup': 0, 'dropoff': 0}, {'seq': 20, 'stop_id': 70, 'arv_time': '07:17:00', 'dep_time': '07:17:00', 'pickup': 0, 'dropoff': 0}, {'seq': 21, 'stop_id': 74, 'arv_time': '07:18:00', 'dep_time': '07:18:00', 'pickup': 0, 'dropoff': 0}, {'seq': 22, 'stop_id': 75, 'arv_time': '07:19:00', 'dep_time': '07:19:00', 'pickup': 0, 'dropoff': 0}, {'seq': 23, 'stop_id': 78, 'arv_time': '07:20:00', 'dep_time': '07:20:00', 'pickup': 0, 'dropoff': 0}, {'seq': 24, 'stop_id': 80, 'arv_time': '07:21:00', 'dep_time': '07:21:00', 'pickup': 0, 'dropoff': 0}, {'seq': 25, 'stop_id': 82, 'arv_time': '07:22:00', 'dep_time': '07:22:00', 'pickup': 0, 'dropoff': 0}, {'seq': 26, 'stop_id': 1696, 'arv_time': '07:23:00', 'dep_time': '07:23:00', 'pickup': 0, 'dropoff': 0}, {'seq': 27, 'stop_id': 1693, 'arv_time': '07:24:00', 'dep_time': '07:24:00', 'pickup': 0, 'dropoff': 0}, {'seq': 28, 'stop_id': 1699, 'arv_time': '07:26:00', 'dep_time': '07:26:00', 'pickup': 0, 'dropoff': 0}, {'seq': 29, 'stop_id': 1697, 'arv_time': '07:27:00', 'dep_time': '07:27:00', 'pickup': 0, 'dropoff': 0}, {'seq': 30, 'stop_id': 1702, 'arv_time': '07:28:00', 'dep_time': '07:28:00', 'pickup': 0, 'dropoff': 0}, {'seq': 31, 'stop_id': 1703, 'arv_time': '07:28:00', 'dep_time': '07:28:00', 'pickup': 1, 'dropoff': 0}]
