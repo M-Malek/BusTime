@@ -1,5 +1,5 @@
 class TripProgress:
-    def __init__(self, trip_id, route_id, stops, current_stop_seq, detected_stops, last_processed_timestamp, status):
+    def __init__(self, trip_id, route_id, stops, current_stop_seq, detected_stops, last_processed_timestamp, status, accomplished_stops_count=0):
         self.trip_id = trip_id
         self.route_id = route_id
         # self.vehicle_id = vehicle_id
@@ -10,13 +10,13 @@ class TripProgress:
 
         self.stops = stops
         self.all_stops_count = len(stops or [])
-        self.accomplished_stops_count = 0
+        self.accomplished_stops_count = accomplished_stops_count
 
-        self.current_stop_seq = None
-        self.detected_stops = []
+        #self.current_stop_seq = None
+        #self.detected_stops = []
 
-        self.last_processed_timestamp = None
-        self.status = "IN_PROGRESS"
+        #self.last_processed_timestamp = None
+        #self.status = "IN_PROGRESS"
 
     def get_next_stop(self):
         if self.current_stop_seq is None:
@@ -50,5 +50,6 @@ class TripProgress:
             trip_dict["current_stop_seq"],
             trip_dict["detected_stops"],
             trip_dict["last_processed_timestamp"],
-            trip_dict["status"]
+            trip_dict["status"],
+            accomplished_stops_count=trip_dict.get("accomplished_stops_count", 0)
         )
