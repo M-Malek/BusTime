@@ -9,6 +9,7 @@ from src.data_processing.calculate_statistic import calculate_statistic
 from src.mongo_service.save_calculations import save_calculations
 from ztm_tools.s3_manager.download_data.file_downloader import download_data_lines
 from src.mongo_service.trips_data_importer import trips_data_importer
+from src.data_processing.process_line import process_line
 import pandas as pd
 #  Remember: after downloading data from ZTM Micro 3 has to give info to Micro 2 - replace data!
 def job_statistic():
@@ -76,9 +77,9 @@ def job_statistic():
     # Recalculate last trip
     process_current_trip()
 
-    # 4. Calculate line statistic:
-    # Download all statistic data
+    # 4. Calculate line statistic from all saved TripProgress records.
     trips = trips_data_importer()
+    return process_line(trips)
 
 # def job_statistic():
 #     """
