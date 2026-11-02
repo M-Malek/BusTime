@@ -4,12 +4,11 @@ Micro3 jobs
 """
 
 from src.mongo_service.vehicle_location_importer import vehicles_data_downloader
-from src.mongo_service.vehicles_data_organizer import organize_vehicles_data
-from src.s3_service.s3_data_downloader import download_s3_data
 from src.data_processing.process_trip import process_trip
 from src.data_processing.calculate_statistic import calculate_statistic
 from src.mongo_service.save_calculations import save_calculations
 from ztm_tools.s3_manager.download_data.file_downloader import download_data_lines
+from src.mongo_service.trips_data_importer import trips_data_importer
 import pandas as pd
 #  Remember: after downloading data from ZTM Micro 3 has to give info to Micro 2 - replace data!
 def job_statistic():
@@ -36,11 +35,13 @@ def job_statistic():
     # 1. Download portion of Vehicle data from MongoDB
     vehicles = vehicles_data_downloader()
 
+    # 2. Prepare information about trip
     current_key = None
     current_trip_rows = []
     schedules_df = None
     current_route_id = None
 
+    # 3.1 Function to work with Trip
     def process_current_trip():
         if not current_trip_rows:
             return
@@ -55,24 +56,29 @@ def job_statistic():
             calculations = calculate_statistic(processed_trip, schedules_df)
             save_calculations(calculations)
 
+    # 3. Iterate through all founded trips and calculate trip statistic
     for vehicle in vehicles:
         key = (vehicle["route_id"], vehicle["trip_id"])
 
         if key != current_key:
-            # Poprzedni trip jest kompletny, bo kursor jest posortowany.
+            # Last trip has been accomplished because key is sorted
             process_current_trip()
 
             current_key = key
             current_trip_rows = []
             current_route_id = vehicle["route_id"]
 
-            # Pobierz harmonogram ponownie tylko przy zmianie route_id.
+            # Download new schedule if trip has been changed
             schedules_df = download_data_lines(current_route_id)
 
         current_trip_rows.append(vehicle)
 
-    # Przetwórz ostatni trip po zakończeniu kursora.
+    # Recalculate last trip
     process_current_trip()
+
+    # 4. Calculate line statistic:
+    # Download all statistic data
+    trips = trips_data_importer()
 
 # def job_statistic():
 #     """

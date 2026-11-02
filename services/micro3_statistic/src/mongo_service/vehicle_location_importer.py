@@ -7,6 +7,7 @@ import os
 import pymongo
 from ztm_tools.mongo_tools.mongo_connect import create_mongo_connection
 from ztm_tools.logging.logger import main_logger
+from src.mongo_service.mongo_iter_downloader import mongo_iter_downloader
 
 def vehicles_data_downloader(batch_count=1000):
     """
@@ -14,31 +15,31 @@ def vehicles_data_downloader(batch_count=1000):
     :param batch_count: Number of batches to download
     :return: dict with vehicle positions data
     """
-
-    client = create_mongo_connection(os.getenv("MONGO_URI"))
-    if client is None:
-        main_logger("error", "Cannot download vehicle data from database")
-        return iter(())
-
-    def iter_mongo_documents():
-        try:
-            collection = client["Poznan"]["Vehicles"]
-            cursor = (
-                collection.find({}, {"_id": 0})
-                .sort([("route_id", 1), ("trip_id", 1)])
-                .allow_disk_use(True)
-                .batch_size(batch_count)
-            )
-
-            yield from cursor
-
-        except pymongo.errors.PyMongoError as err:
-            main_logger("error", f"Error during preparing data in batch: {err}")
-
-        finally:
-            client.close()
-
-    return iter_mongo_documents()
+    mongo_iter_downloader("Poznan", "Vehicles", batch_count)
+    # client = create_mongo_connection(os.getenv("MONGO_URI"))
+    # if client is None:
+    #     main_logger("error", "Cannot download vehicle data from database")
+    #     return iter(())
+    #
+    # def iter_mongo_documents():
+    #     try:
+    #         collection = client["Poznan"]["Vehicles"]
+    #         cursor = (
+    #             collection.find({}, {"_id": 0})
+    #             .sort([("route_id", 1), ("trip_id", 1)])
+    #             .allow_disk_use(True)
+    #             .batch_size(batch_count)
+    #         )
+    #
+    #         yield from cursor
+    #
+    #     except pymongo.errors.PyMongoError as err:
+    #         main_logger("error", f"Error during preparing data in batch: {err}")
+    #
+    #     finally:
+    #         client.close()
+    #
+    # return iter_mongo_documents()
 
 # def vehicles_data_downloader(batch_count=5000):
 #     """
