@@ -34,19 +34,26 @@ def calculate_statistic(current_trip, schedules_df):
     # Iterate through detected stops in detected_stops
     for stop in detected_stops:
         # Take id of detected stop
-        trip_stop_id = stop["referenced_stop_id"]
-        # Take sequence number of detected stop:
-        trip_sequence = stop["sequence"]
-        # Find the scheduled stop matching both its sequence and stop id:
-        schedule_for_trip_stop_id = next(
-            (
-                scheduled_stop
-                for scheduled_stop in current_schedule
-                if scheduled_stop["seq"] == trip_sequence
-                and scheduled_stop["stop_id"] == trip_stop_id
-            ),
-            None,
-        )
+        trip_stop_id = stop.get("referenced_stop_id", stop.get("reference_stop_id", stop.get("stop_id")))
+        # Prefer the sequence saved with the MongoDB observation. For older
+        # records without it, estimate the sequence from the MinIO schedule.
+        trip_sequence = stop.get("sequence")
+        if trip_sequence is not None:
+            schedule_for_trip_stop_id = next(
+                (scheduled_stop for scheduled_stop in current_schedule
+                 if scheduled_stop["seq"] == trip_sequence),
+                None,
+            )
+        else:
+            schedule_for_trip_stop_id = next(
+                (scheduled_stop for scheduled_stop in current_schedule
+                 if trip_stop_id is not None
+                 and scheduled_stop["stop_id"] == trip_stop_id),
+                None,
+            )
+            if schedule_for_trip_stop_id is not None:
+                trip_sequence = schedule_for_trip_stop_id["seq"]
+                stop["sequence"] = trip_sequence
         stop_completed = False
         stop_delay = None
         if schedule_for_trip_stop_id is not None:
@@ -77,7 +84,7 @@ def calculate_statistic(current_trip, schedules_df):
 
             stop_completed = window_start <= observation_datetime <= window_end
             if not stop_completed:
-                stop_delay = max(timedelta(0), observation_datetime - window_end)
+                stop_delay = max(0, (observation_datetime - window_end).total_seconds())
 
             # Add delay to DetectedStop Object
             stop['delay'] = stop_delay
@@ -94,16 +101,30 @@ def calculate_statistic(current_trip, schedules_df):
     current_trip.detected_stops[0] = detected_stops
 
     # Update information about last stop:
-    last_detected_stop_time = detected_stops[0]['observation_time']
+    if not detected_stops:
+        current_trip.status = f"IN PROGRESS: 0/{current_trip.all_stops_count}"
+        return current_trip
+
+    # The list is sorted oldest to newest, so the final item is the latest observation.
+    latest_stop = detected_stops[-1]
+    last_detected_stop_time = latest_stop["observation_time"]
     current_trip.last_processed_timestamp = last_detected_stop_time
-    last_detected_stop = detected_stops[0]['stop_id']
-    current_trip.current_stop_seq = last_detected_stop
+    last_detected_stop = latest_stop.get(
+        "referenced_stop_id", latest_stop.get("reference_stop_id", latest_stop.get("stop_id"))
+    )
+    scheduled_last_stop = next(
+        (stop for stop in current_schedule if stop["stop_id"] == last_detected_stop),
+        None,
+    )
+    current_trip.current_stop_seq = latest_stop.get("sequence")
+    if current_trip.current_stop_seq is None and scheduled_last_stop is not None:
+        current_trip.current_stop_seq = scheduled_last_stop["seq"]
 
     # Update trip progress:
     current_trip.status = f"IN PROGRESS: {len(detected_stops)}/{current_trip.all_stops_count}"
 
     # Check if vehicle trip is over if last_detected_stop count is last item of all_stops_count
-    if last_detected_stop == current_schedule[-1]:
+    if current_schedule and current_trip.current_stop_seq == current_schedule[-1]["seq"]:
         current_trip.status = "COMPLETED"
 
     # Debug:

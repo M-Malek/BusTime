@@ -15,7 +15,7 @@ def vehicles_data_downloader(batch_count=1000):
     :param batch_count: Number of batches to download
     :return: dict with vehicle positions data
     """
-    mongo_iter_downloader("Poznan", "Vehicles", batch_count)
+    return mongo_iter_downloader("Poznan", "Vehicles", batch_count)
     # client = create_mongo_connection(os.getenv("MONGO_URI"))
     # if client is None:
     #     main_logger("error", "Cannot download vehicle data from database")

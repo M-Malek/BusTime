@@ -72,15 +72,18 @@ def main_logger(message_type, message_body):
     # Idea: add third variable called "service_type" which should be added to message_body:
     # service_type + ": " + message_body
     # then create one log file for logging for all 4 services - check if it is possible!
+    # Load information about microservice - call it if it has been set
+    microservice_name = os.getenv("MICROSERVICE_NAME")
+    microservice_prefx = microservice_name if microservice_name else ""
     match message_type:
         case "info":
-            logger.info(message_body)
+            logger.info(f"{microservice_prefx}: {message_body}")
         case "warning":
-            logger.warning(message_body)
+            logger.warning(f"{microservice_prefx}: {message_body}")
         case "error":
-            logger.error(message_body)
+            logger.error(f"{microservice_prefx}: {message_body}")
         case "crit":
-            logger.critical(message_body)
+            logger.critical(f"{microservice_prefx}: {message_body}")
         case _:
-            logger.info(message_body)
+            logger.info(f"{microservice_prefx}: {message_body}")
 
