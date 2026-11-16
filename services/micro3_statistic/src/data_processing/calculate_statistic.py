@@ -1,14 +1,16 @@
 from pandas import DataFrame as df
 from datetime import datetime, timedelta
 
-def calculate_statistic(current_trip, schedules_df):
+def calculate_statistic(current_trip, schedules_df, observations=None):
     """
     Calculate statistic of given trip
     :param current_trip: TripProgress object with information about the current trip
     :return: current_calc: TripProgress object with statistic calculations added
     """
     # Take only detected stops
-    detected_stops = current_trip.detected_stops[0]
+    detected_stops = list(
+        current_trip.detected_stops if observations is None else observations
+    )
     # Take current schedule of examined trip_id
     current_schedule = schedules_df.loc[current_trip.trip_id]["routes"]["trip_data"]
     current_trip.all_stops_count = len(current_schedule)
@@ -98,15 +100,16 @@ def calculate_statistic(current_trip, schedules_df):
 
     # Update data in current_trip object of TripProgress class:
     # Update detected_stops by delay between points:
-    current_trip.detected_stops[0] = detected_stops
-
     # Update information about last stop:
     if not detected_stops:
-        current_trip.status = f"IN PROGRESS: 0/{current_trip.all_stops_count}"
+        current_trip.status = (
+            f"IN PROGRESS: {len(current_trip.detected_stops or [])}/"
+            f"{current_trip.all_stops_count}"
+        )
         return current_trip
 
     # The list is sorted oldest to newest, so the final item is the latest observation.
-    latest_stop = detected_stops[-1]
+    latest_stop = max(detected_stops, key=lambda stop: stop["observation_time"])
     last_detected_stop_time = latest_stop["observation_time"]
     current_trip.last_processed_timestamp = last_detected_stop_time
     last_detected_stop = latest_stop.get(
@@ -121,7 +124,10 @@ def calculate_statistic(current_trip, schedules_df):
         current_trip.current_stop_seq = scheduled_last_stop["seq"]
 
     # Update trip progress:
-    current_trip.status = f"IN PROGRESS: {len(detected_stops)}/{current_trip.all_stops_count}"
+    current_trip.status = (
+        f"IN PROGRESS: {len(current_trip.detected_stops or [])}/"
+        f"{current_trip.all_stops_count}"
+    )
 
     # Check if vehicle trip is over if last_detected_stop count is last item of all_stops_count
     if current_schedule and current_trip.current_stop_seq == current_schedule[-1]["seq"]:

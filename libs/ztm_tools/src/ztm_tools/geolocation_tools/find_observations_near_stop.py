@@ -1,4 +1,6 @@
 from scipy.spatial import cKDTree
+import numpy as np
+import pandas as pd
 
 from ztm_tools.geolocation_tools.lat_lng_to_meters import lat_lng_to_meters
 from ztm_tools.geolocation_tools.haversine_method import haversine
@@ -12,8 +14,32 @@ def find_observations_near_stops(filtered_points, trip_data, stops, max_distance
 
     # `stops` ma postać {stop_id: (lat, lng)}. Zachowujemy tę samą
     # kolejność dla współrzędnych drzewa i identyfikatorów przystanków.
-    stop_ids = list(stops)
-    stop_positions = [stops[stop_id] for stop_id in stop_ids]
+    stop_ids = []
+    stop_positions = []
+    for stop_id, position in stops.items():
+        try:
+            lat, lng = float(position[0]), float(position[1])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if (np.isfinite(lat) and np.isfinite(lng)
+                and -90 <= lat <= 90 and -180 <= lng <= 180):
+            stop_ids.append(stop_id)
+            stop_positions.append((lat, lng))
+    if not stop_positions:
+        return []
+
+    filtered_points = filtered_points.copy()
+    filtered_points["lat"] = pd.to_numeric(filtered_points["lat"], errors="coerce")
+    filtered_points["lng"] = pd.to_numeric(filtered_points["lng"], errors="coerce")
+    valid_points = (
+        np.isfinite(filtered_points["lat"].to_numpy(dtype=np.float64))
+        & np.isfinite(filtered_points["lng"].to_numpy(dtype=np.float64))
+        & filtered_points["lat"].between(-90, 90).to_numpy()
+        & filtered_points["lng"].between(-180, 180).to_numpy()
+    )
+    filtered_points = filtered_points.loc[valid_points].reset_index(drop=True)
+    if filtered_points.empty:
+        return []
     stop_x, stop_y = lat_lng_to_meters(
         [position[0] for position in stop_positions],
         [position[1] for position in stop_positions],

@@ -3,12 +3,17 @@ Micro3 jobs
 @M-Malek
 """
 
-from src.mongo_service.vehicle_location_importer import vehicles_data_downloader
+from src.mongo_service.vehicle_location_importer import (
+    delete_processed_vehicle_documents,
+    vehicle_trip_keys,
+    vehicles_data_downloader,
+)
 from src.data_processing.process_trip import process_trip
 from src.data_processing.calculate_statistic import calculate_statistic
 from src.mongo_service.save_calculations import save_calculations
 from ztm_tools.s3_manager.download_data.file_downloader import download_data_lines
 from src.mongo_service.trips_data_importer import trips_data_importer
+from src.mongo_service.take_mongo_data import take_mongo_data
 from src.data_processing.process_line import process_line
 import pandas as pd
 #  Remember: after downloading data from ZTM Micro 3 has to give info to Micro 2 - replace data!
@@ -33,49 +38,43 @@ def job_statistic():
     12. Send message to SQS form Microservice 2?
     """
 
-    # 1. Download portion of Vehicle data from MongoDB
-    vehicles = vehicles_data_downloader()
+    # Read and process only rows newer than each trip's saved source cursor.
+    schedules_by_route = {}
+    for key_document in vehicle_trip_keys():
+        trip_id = key_document["_id"]["trip_id"]
+        route_id = key_document["_id"]["route_id"]
+        current_trip = take_mongo_data(trip_id, route_id)
+        vehicles = list(vehicles_data_downloader(
+            trip_id=trip_id,
+            route_id=route_id,
+            last_timestamp=current_trip.last_processed_vehicle_timestamp,
+            last_id=current_trip.last_processed_vehicle_id,
+        ))
+        if not vehicles:
+            continue
 
-    # 2. Prepare information about trip
-    current_key = None
-    current_trip_rows = []
-    schedules_df = None
-    current_route_id = None
+        if route_id not in schedules_by_route:
+            schedules_by_route[route_id] = download_data_lines(route_id)
+        schedules_df = schedules_by_route[route_id]
+        trip_df = pd.DataFrame(vehicles)
+        processed_trip = process_trip(
+            (route_id, trip_df),
+            schedules_df,
+            current_trip=current_trip,
+            new_cursor=vehicles[-1],
+        )
+        if processed_trip is None:
+            # Keep source documents for retry; cursor remains unchanged.
+            continue
 
-    # 3.1 Function to work with Trip
-    def process_current_trip():
-        if not current_trip_rows:
-            return
-
-        trip_df = pd.DataFrame(current_trip_rows)
-
-        trip = (current_key[1], trip_df)
-
-        processed_trip = process_trip(trip, schedules_df)
-
-        if processed_trip is not None:
-            calculations = calculate_statistic(processed_trip, schedules_df)
-            save_calculations(calculations)
-
-    # 3. Iterate through all founded trips and calculate trip statistic
-    for vehicle in vehicles:
-        key = (vehicle["route_id"], vehicle["trip_id"])
-
-        if key != current_key:
-            # Last trip has been accomplished because key is sorted
-            process_current_trip()
-
-            current_key = key
-            current_trip_rows = []
-            current_route_id = vehicle["route_id"]
-
-            # Download new schedule if trip has been changed
-            schedules_df = download_data_lines(current_route_id)
-
-        current_trip_rows.append(vehicle)
-
-    # Recalculate last trip
-    process_current_trip()
+        calculations = calculate_statistic(
+            processed_trip,
+            schedules_df,
+            observations=processed_trip.new_observations,
+        )
+        save_result = save_calculations(calculations)
+        # if save_result is not None and save_result.acknowledged:
+        #     delete_processed_vehicle_documents([item["_id"] for item in vehicles])
 
     # 4. Calculate line statistic from all saved TripProgress records.
     trips = trips_data_importer()

@@ -1,11 +1,10 @@
 from ztm_tools.s3_manager.download_data.file_downloader import download_data_shapes
 from ztm_tools.logging.logger import main_logger
 from ztm_tools.geolocation_tools.filter_points_on_route import filter_points_on_route
-from src.mongo_service.take_mongo_data import take_mongo_data
 from ztm_tools.geolocation_tools.find_observations_near_stop import find_observations_near_stops
 from ztm_tools.mongo_tools.statistic_tools.collect_stop_position import collect_stop_position
 
-def process_trip(trip, schedules_df):
+def process_trip(trip, schedules_df, current_trip=None, new_cursor=None):
     """
     Main data processing function
     :param trip: organized data of actual Vehicle trip
@@ -19,7 +18,8 @@ def process_trip(trip, schedules_df):
     # If it doesn't exist - create it
     trip_id = trip["trip_id"].unique()[0]
     route_id = trip.loc[trip["trip_id"] == trip_id, "route_id"].iloc[0]
-    current_trip = take_mongo_data(trip_id, route_id)
+    if current_trip is None:
+        raise ValueError("process_trip requires the current TripProgress object")
 
     # Step 1: load all necessary data:
     # Prepare reference trip data from .zip files - it is theoretical vehicle route
@@ -73,7 +73,11 @@ def process_trip(trip, schedules_df):
         current_trip.stops = stop_id_list
     elif len(current_trip.stops) == 0:
         current_trip.stops = stop_id_list
-    current_trip.detected_stops.append(observation_points)
-    saved_data = take_mongo_data(trip_id, route_id, current_trip)
-    main_logger("info", f"Saved data for trip: {saved_data.trip_id}")
+    # Keep a single persistent observation list. The caller calculates and
+    # persists this object only after the whole input batch was processed.
+    current_trip.new_observations = list(observation_points or [])
+    current_trip.detected_stops.extend(current_trip.new_observations)
+    if new_cursor is not None:
+        current_trip.last_processed_vehicle_timestamp = new_cursor["timestamp"]
+        current_trip.last_processed_vehicle_id = new_cursor["_id"]
     return current_trip
