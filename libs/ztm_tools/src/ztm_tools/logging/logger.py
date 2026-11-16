@@ -29,6 +29,11 @@ def main_logger(message_type, message_body):
     :param message: str, message for logger
     :return: logging service logic
     """
+    # Import lazily to keep reporter independent from logger initialization.
+    from ztm_tools.logging.reporter import record_logger_call
+
+    record_logger_call(message_type)
+
     # Create logger object
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
