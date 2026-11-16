@@ -15,6 +15,7 @@ from ztm_tools.s3_manager.download_data.file_downloader import download_data_lin
 from src.mongo_service.trips_data_importer import trips_data_importer
 from src.mongo_service.take_mongo_data import take_mongo_data
 from src.data_processing.process_line import process_line
+from ztm_tools.logging.reporter import reporter
 import pandas as pd
 #  Remember: after downloading data from ZTM Micro 3 has to give info to Micro 2 - replace data!
 def job_statistic():
@@ -38,9 +39,13 @@ def job_statistic():
     12. Send message to SQS form Microservice 2?
     """
 
+    # Start the reporting interval and check it throughout trip processing.
+    reporter()
+
     # Read and process only rows newer than each trip's saved source cursor.
     schedules_by_route = {}
     for key_document in vehicle_trip_keys():
+        reporter()
         trip_id = key_document["_id"]["trip_id"]
         route_id = key_document["_id"]["route_id"]
         current_trip = take_mongo_data(trip_id, route_id)
@@ -73,12 +78,15 @@ def job_statistic():
             observations=processed_trip.new_observations,
         )
         save_result = save_calculations(calculations)
+        reporter()
         # if save_result is not None and save_result.acknowledged:
         #     delete_processed_vehicle_documents([item["_id"] for item in vehicles])
 
     # 4. Calculate line statistic from all saved TripProgress records.
     trips = trips_data_importer()
-    return process_line(trips)
+    result = process_line(trips)
+    reporter()
+    return result
 
 # def job_statistic():
 #     """
